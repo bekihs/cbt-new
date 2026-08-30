@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CBT Companion</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+<div class="wrap-card">
+
+  <header class="app-header">
+    <div class="header-badge">&#9776;</div>
+    <div class="header-copy">
+      <h1>CBT Companion</h1>
+      <p data-i18n="appSubtitle">Work through a difficult thought, step by step.</p>
+    </div>
+    <div class="header-lang">
+      <select id="language-select" class="language-select" aria-label="Language">
+        <option value="en">EN</option>
+        <option value="he">HE</option>
+      </select>
+    </div>
+  </header>
+
+  <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+  <div class="progress-label" id="progress-label"></div>
+
+  <form id="cbt-form">
+
+    <!-- Step 1: Situation -->
+    <section class="step" data-step="1">
+      <span class="step-title" data-i18n="step1Title">The Situation</span>
+      <p class="step-subtitle" data-i18n="step1Subtitle">What happened?</p>
+
+      <div class="field">
+        <label for="title"><span data-i18n="title">Title</span> <span class="hint" style="display:inline" data-i18n="optionalText">(optional)</span></label>
+        <div class="wrap-input"><input type="text" id="title" data-i18n-placeholder="titlePlaceholder" placeholder="e.g. Meeting with my manager"></div>
+      </div>
+
+      <div class="field">
+        <label for="date" data-i18n="date">Date</label>
+        <div class="wrap-input"><input type="date" id="date"></div>
+      </div>
+
+      <div class="field">
+        <label for="situation" data-i18n="situation">Situation or event</label>
+        <span class="hint" data-i18n="situationHint">Where were you, who was there, what happened?</span>
+        <div class="wrap-input"><textarea id="situation" data-i18n-placeholder="situationPlaceholder" placeholder="Describe the situation"></textarea></div>
+      </div>
+    </section>
+
+    <!-- Step 2: Feelings before -->
+    <section class="step" data-step="2" hidden>
+      <span class="step-title" data-i18n="step2Title">How You Felt</span>
+      <p class="step-subtitle" data-i18n="step2Subtitle">Select every emotion that applies, then set its intensity.</p>
+      <div class="emotion-picker" id="emotions-before"></div>
+      <div class="intensity-list" id="intensity-before"></div>
+    </section>
+
+    <!-- Step 3: Automatic thoughts -->
+    <section class="step" data-step="3" hidden>
+      <span class="step-title" data-i18n="step3Title">Automatic Thoughts</span>
+      <p class="step-subtitle" data-i18n="step3Subtitle">Look closer at what went through your mind.</p>
+
+      <div class="field">
+        <label for="physicalSensations" data-i18n="physicalSensations">Physical sensations</label>
+        <span class="hint" data-i18n="physicalSensationsHint">What did you notice in your body?</span>
+        <div class="wrap-input"><textarea id="physicalSensations"></textarea></div>
+      </div>
+
+      <div class="field">
+        <label for="automaticThought" data-i18n="automaticThought">Unhelpful thought</label>
+        <div class="wrap-input"><textarea id="automaticThought" data-i18n-placeholder="automaticThoughtPlaceholder" placeholder="e.g. I'll never be good enough at my job"></textarea></div>
+      </div>
+
+      <div class="field">
+        <div class="level-row">
+          <span class="level-label" data-i18n="beliefLevel">How much do you believe it?</span>
+          <span class="level-value"><span data-i18n="levelLabel">Level</span>: <b id="level-value">50</b>/100</span>
+        </div>
+        <div class="level-slider">
+          <div class="track"></div>
+          <div class="fill" id="level-fill"></div>
+          <input type="range" id="level" min="0" max="100" value="50">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="interpretation" data-i18n="interpretation">Interpretation</label>
+        <span class="hint" data-i18n="interpretationHint">How did you interpret what happened? What meaning did it have for you?</span>
+        <div class="wrap-input"><textarea id="interpretation"></textarea></div>
+      </div>
+
+      <div class="field">
+        <label for="pastExperiences" data-i18n="pastExperiences">Past experiences</label>
+        <span class="hint" data-i18n="pastExperiencesHint">What past experiences influence this interpretation?</span>
+        <div class="wrap-input"><textarea id="pastExperiences"></textarea></div>
+      </div>
+
+      <div class="field">
+        <label for="beliefs" data-i18n="beliefs">Underlying beliefs</label>
+        <div class="wrap-input"><textarea id="beliefs"></textarea></div>
+      </div>
+
+      <div class="field">
+        <label for="consequence" data-i18n="consequence">Consequence / behavior</label>
+        <span class="hint" data-i18n="consequenceHint">What did you do (or want to do) as a result?</span>
+        <div class="wrap-input"><textarea id="consequence"></textarea></div>
+      </div>
+    </section>
+
+    <!-- Step 4: Identify distortions & evidence -->
+    <section class="step" data-step="4" hidden>
+      <span class="step-title" data-i18n="step4Title">Identify &amp; Challenge</span>
+      <p class="step-subtitle" data-i18n="step4Subtitle">Question the evidence, and spot any thinking traps.</p>
+
+      <div class="field">
+        <label for="evidenceFor" data-i18n="evidenceFor">Evidence that supports the thought</label>
+        <div class="wrap-input"><textarea id="evidenceFor"></textarea></div>
+      </div>
+
+      <div class="field">
+        <label for="evidenceAgainst" data-i18n="evidenceAgainst">Evidence against the thought</label>
+        <div class="wrap-input"><textarea id="evidenceAgainst"></textarea></div>
+      </div>
+
+      <div class="field">
+        <label data-i18n="cognitiveDistortions">Cognitive distortions</label>
+        <span class="hint" data-i18n="distortionsHint">Select any thinking traps you notice in this thought.</span>
+        <div class="chip-grid" id="distortion-list"></div>
+      </div>
+    </section>
+
+    <!-- Step 5: Reframe -->
+    <section class="step" data-step="5" hidden>
+      <span class="step-title" data-i18n="step5Title">Better Coping</span>
+      <p class="step-subtitle" data-i18n="step5Subtitle">Create a balanced, realistic alternative thought.</p>
+
+      <div class="field">
+        <label for="balancedThought" data-i18n="balancedThought">Balanced alternative thought</label>
+        <div class="wrap-input"><textarea id="balancedThought" data-i18n-placeholder="balancedThoughtPlaceholder" placeholder="e.g. I'm still learning and improving. One mistake doesn't define my abilities"></textarea></div>
+      </div>
+
+      <div class="field">
+        <label for="newEmotionBehavior" data-i18n="newEmotionBehavior">New emotion &amp; behavior</label>
+        <span class="hint" data-i18n="newEmotionBehaviorHint">Holding the balanced thought, how do you feel and act now?</span>
+        <div class="wrap-input"><textarea id="newEmotionBehavior"></textarea></div>
+      </div>
+
+      <div class="field">
+        <label for="nextAction" data-i18n="nextAction">What will you do differently?</label>
+        <div class="wrap-input"><textarea id="nextAction"></textarea></div>
+      </div>
+    </section>
+
+    <!-- Step 6: Feelings after -->
+    <section class="step" data-step="6" hidden>
+      <span class="step-title" data-i18n="step6Title">How You Feel Now</span>
+      <p class="step-subtitle" data-i18n="step6Subtitle">Re-select your emotions and re-rate their intensity.</p>
+      <div class="emotion-picker" id="emotions-after"></div>
+      <div class="intensity-list" id="intensity-after"></div>
+    </section>
+
+    <!-- Step 7: Review -->
+    <section class="step" data-step="7" hidden>
+      <div class="confirmation">
+        <h2 data-i18n="exerciseReview">Exercise Review</h2>
+        <p data-i18n="savedOnDevice">Saved on this device.</p>
+      </div>
+      <div class="review-eyebrow" data-i18n="thoughtRecord">Thought Record</div>
+      <div class="timeline" id="review-timeline"></div>
+    </section>
+
+    <div class="nav-buttons">
+      <button type="button" class="btn secondary" id="btn-prev" data-i18n="back">Back</button>
+      <button type="button" class="btn" id="btn-next" data-i18n="next">Next</button>
+    </div>
+  </form>
+
+</div>
+  <div class="footer-link">
+    <a href="needs.html">Feelings &amp; needs flow &rarr;</a>
+    <br><br>
+    <a href="history.html">View past entries &rarr;</a>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,609 @@
+const EMOTION_CATEGORIES = [
+  {
+    name: "Happy",
+    items: [
+      ["Interested", "מעוניין"], ["Curious", "סקרן"], ["Inspired", "מלא השראה"],
+      ["Hopeful", "מלא תקווה"], ["Confident", "בטוח בעצמו"], ["Successful", "מצליח"],
+      ["Respected", "מוערך"], ["Valued", "יקר ערך"], ["Loving", "אוהב"],
+      ["Thankful", "אסיר תודה"], ["Joyful", "עליז"], ["Content", "שבע רצון"],
+      ["Free", "חופשי"], ["Playful", "שובב"], ["Courageous", "אמיץ"],
+      ["Creative", "יצירתי"], ["Proud", "גאה"], ["Optimistic", "אופטימי"],
+    ],
+  },
+  {
+    name: "Sad",
+    items: [
+      ["Lonely", "בודד"], ["Isolated", "מבודד"], ["Abandoned", "נטוש"],
+      ["Vulnerable", "פגיע"], ["Fragile", "שביר"], ["Despairing", "מיואש"],
+      ["Grieving", "שרוי באבל"], ["Powerless", "חסר אונים"], ["Guilty", "אשם"],
+      ["Ashamed", "מתבייש"], ["Remorseful", "מתחרט"], ["Depressed", "מדוכא"],
+      ["Empty", "ריק"], ["Inferior", "נחות"], ["Hurt", "פגוע"],
+      ["Disappointed", "מאוכזב"], ["Embarrassed", "נבוך"],
+    ],
+  },
+  {
+    name: "Disgusted",
+    items: [
+      ["Disapproving", "מגנה"], ["Judgmental", "שיפוטי"], ["Appalled", "נחרד"],
+      ["Revolted", "סולד"], ["Nauseated", "בחילה"], ["Detestable", "מתועב"],
+      ["Repelled", "נדחה"], ["Hesitant", "מהסס"], ["Horrified", "אחוז אימה"],
+      ["Avoidant", "נמנע"],
+    ],
+  },
+  {
+    name: "Angry",
+    items: [
+      ["Betrayed", "נבגד"], ["Resentful", "רוחש טינה"], ["Humiliated", "מושפל"],
+      ["Disrespected", "לא מכובד"], ["Ridiculed", "מבוזה"], ["Bitter", "מריר"],
+      ["Indignant", "נזעם"], ["Violated", "מופר"], ["Mad", "זועם"],
+      ["Furious", "רותח מזעם"], ["Jealous", "מקנא"], ["Provoked", "מגורה"],
+      ["Hostile", "עוין"], ["Frustrated", "מתוסכל"], ["Infuriated", "משתולל"],
+      ["Annoyed", "מוטרד"], ["Withdrawn", "מסתגר"], ["Numb", "קהה רגש"],
+      ["Skeptical", "ספקן"], ["Dismissive", "מזלזל"],
+    ],
+  },
+  {
+    name: "Fearful",
+    items: [
+      ["Scared", "מפוחד"], ["Helpless", "חסר ישע"], ["Frightened", "נבהל"],
+      ["Anxious", "חרד"], ["Overwhelmed", "המום"], ["Worried", "מודאג"],
+      ["Insecure", "חסר ביטחון"], ["Inadequate", "לא מספיק טוב"], ["Weak", "חלש"],
+      ["Worthless", "חסר ערך"], ["Insignificant", "חסר משמעות"], ["Rejected", "דחוי"],
+      ["Excluded", "מוחרג"], ["Persecuted", "נרדף"], ["Threatened", "מאוים"],
+      ["Nervous", "עצבני"], ["Exposed", "חשוף"],
+    ],
+  },
+  {
+    name: "Stressed",
+    items: [
+      ["Bored", "משועמם"], ["Indifferent", "אדיש"], ["Apathetic", "חסר עניין"],
+      ["Busy", "עסוק"], ["Pressured", "תחת לחץ"], ["Rushed", "ממהר"],
+      ["Stressed", "בלחץ"], ["Out of control", "חסר שליטה"], ["Tired", "עייף"],
+      ["Sleepy", "מנומנם"], ["Unfocused", "לא מרוכז"],
+    ],
+  },
+  {
+    name: "Surprised",
+    items: [
+      ["Startled", "נבהל בפתאומיות"], ["Shocked", "בהלם"], ["Dismayed", "נסער"],
+      ["Confused", "מבולבל"], ["Perplexed", "תמה"], ["Disillusioned", "מפוכח"],
+      ["Amazed", "המום לטובה"], ["Astonished", "נדהם"], ["Awestruck", "נפעם"],
+      ["Excited", "נרגש"], ["Eager", "להוט"], ["Energetic", "נמרץ"],
+    ],
+  },
+];
+
+const EMOTION_MAP = new Map(EMOTION_CATEGORIES.flatMap((c) => c.items));
+
+const COLOR_PALETTE = ["#3ecf8e", "#4fa8e0", "#ef6fa0", "#f2b134", "#9b7fe0", "#3fc1d6", "#ef7d5b", "#e05656"];
+
+function buildMixedEmotions() {
+  const cols = EMOTION_CATEGORIES.map((c) => c.items.slice());
+  const mixed = [];
+  let i = 0;
+  while (cols.some((c) => c.length)) {
+    const col = cols[i % cols.length];
+    if (col.length) mixed.push(col.shift());
+    i++;
+  }
+  return mixed.map(([en, he], idx) => ({ en, he, color: COLOR_PALETTE[idx % COLOR_PALETTE.length] }));
+}
+
+const MIXED_EMOTIONS = buildMixedEmotions();
+const EMOTION_COLOR = new Map(MIXED_EMOTIONS.map((e) => [e.en, e.color]));
+
+const DISTORTIONS = [
+  ["All-or-Nothing Thinking", "Seeing things in black-and-white categories, with no middle ground."],
+  ["Overgeneralization", "Seeing a single negative event as part of a never-ending pattern."],
+  ["Mental Filter", "Dwelling on a single negative detail while ignoring everything positive."],
+  ["Discounting the Positive", "Insisting your positive qualities or achievements don't count."],
+  ["Mind Reading", "Assuming you know what others are thinking without checking."],
+  ["Fortune Telling", "Predicting that things will turn out badly."],
+  ["Catastrophizing", "Blowing things out of proportion, expecting the worst-case outcome."],
+  ["Minimization", "Shrinking the importance of good things that happen."],
+  ["Emotional Reasoning", "Assuming your negative feelings reflect the way things really are."],
+  ["Should Statements", "Criticizing yourself or others with \"shoulds,\" \"musts,\" or \"oughts.\""],
+  ["Labeling", "Attaching a global negative label to yourself or others instead of describing the behavior."],
+  ["Personalization", "Blaming yourself for something you weren't entirely responsible for."],
+  ["Blame", "Blaming other people or circumstances, overlooking your own part."],
+];
+
+const STORAGE_KEY = "cbtEntries";
+const LANG_KEY = "cbtLanguage";
+const totalSteps = 6;
+let currentStep = 1;
+let followedUp = false;
+
+const TEXT = {
+  en: {
+    appSubtitle: "Work through a difficult thought, step by step.",
+    step1Title: "The Situation",
+    step1Subtitle: "What happened?",
+    title: "Title",
+    optionalText: "(optional)",
+    date: "Date",
+    situation: "Situation or event",
+    situationHint: "Where were you, who was there, what happened?",
+    titlePlaceholder: "e.g. Meeting with my manager",
+    situationPlaceholder: "Describe the situation",
+    step2Title: "How You Felt",
+    step2Subtitle: "Select every emotion that applies, then set its intensity.",
+    step3Title: "Automatic Thoughts",
+    step3Subtitle: "Look closer at what went through your mind.",
+    physicalSensations: "Physical sensations",
+    physicalSensationsHint: "What did you notice in your body?",
+    automaticThought: "Unhelpful thought",
+    automaticThoughtPlaceholder: "e.g. I'll never be good enough at my job",
+    beliefLevel: "How much do you believe it?",
+    levelLabel: "Level",
+    interpretation: "Interpretation",
+    interpretationHint: "How did you interpret what happened? What meaning did it have for you?",
+    pastExperiences: "Past experiences",
+    pastExperiencesHint: "What past experiences influence this interpretation?",
+    beliefs: "Underlying beliefs",
+    consequence: "Consequence / behavior",
+    consequenceHint: "What did you do (or want to do) as a result?",
+    step4Title: "Identify & Challenge",
+    step4Subtitle: "Question the evidence, and spot any thinking traps.",
+    evidenceFor: "Evidence that supports the thought",
+    evidenceAgainst: "Evidence against the thought",
+    cognitiveDistortions: "Cognitive distortions",
+    distortionsHint: "Select any thinking traps you notice in this thought.",
+    step5Title: "Better Coping",
+    step5Subtitle: "Create a balanced, realistic alternative thought.",
+    balancedThought: "Balanced alternative thought",
+    balancedThoughtPlaceholder: "e.g. I'm still learning and improving. One mistake doesn't define my abilities",
+    newEmotionBehavior: "New emotion & behavior",
+    newEmotionBehaviorHint: "Holding the balanced thought, how do you feel and act now?",
+    nextAction: "What will you do differently?",
+    step6Title: "How You Feel Now",
+    step6Subtitle: "Re-select your emotions and re-rate their intensity.",
+    exerciseReview: "Exercise Review",
+    savedOnDevice: "Saved on this device.",
+    thoughtRecord: "Thought Record",
+    back: "Back",
+    next: "Next",
+    historyLink: "View past entries →",
+    needsLink: "Feelings & needs flow →",
+    followUp: "❤ Follow Up",
+    seeResults: "See Results",
+    stepOf: "Step",
+    of: "of",
+    pastEntries: "Past Entries",
+    historySubtitle: "Everything you've saved on this device.",
+    newEntryLink: "← New entry",
+    mainCbtLink: "← Back to the main CBT form",
+    needsAppSubtitle: "Trace what is underneath the feeling and what may help.",
+    needsStep1Title: "The Situation",
+    needsStep1Subtitle: "Start with the basics, then choose the emotions you want to explore.",
+    needsTitlePlaceholder: "e.g. Conversation with my partner",
+    needsSituationHint: "What happened, and what was the trigger?",
+    needsSelectFeelingLabel: "Select the feelings you want to explore",
+    needsSelectFeelingHint: "Choose each emotion that is present for you right now.",
+    needsStep2Title: "What sits behind this feeling?",
+    needsStep2Subtitle: "For each selected feeling, notice what is underneath it and name the need behind it.",
+    needsStep3Title: "What would meet this need?",
+    needsStep3Subtitle: "For each feeling, choose the need that fits and describe what would help.",
+    needsStep4Title: "Feelings again",
+    needsStep4Subtitle: "A quick review of the emotions you explored and what they point to.",
+    mainCbtForm: "Back to the main CBT form",
+    saveMessage: "Please choose at least one feeling to continue.",
+    saveMessage2: "Please answer the reflection for each selected feeling before continuing.",
+    saveMessage3: "Please choose a need and describe what would satisfy it for each feeling."
+  },
+  he: {
+    appSubtitle: "עבור דרך מחשבה קשה, צעד אחר צעד.",
+    step1Title: "המצב",
+    step1Subtitle: "מה קרה?",
+    title: "כותרת",
+    optionalText: "(לא חובה)",
+    date: "תאריך",
+    situation: "המצב או האירוע",
+    situationHint: "היכן היית, מי היה שם ומה קרה?",
+    titlePlaceholder: "למשל: פגישה עם המנהל",
+    situationPlaceholder: "תאר את המצב",
+    step2Title: "איך הרגשת?",
+    step2Subtitle: "בחר את כל הרגשות הרלוונטיים ואז קבע את עוצמתם.",
+    step3Title: "מחשבות אוטומטיות",
+    step3Subtitle: "הסתכלו מקרוב על מה שעבר לכם בראש.",
+    physicalSensations: "תחושות גופניות",
+    physicalSensationsHint: "מה שמתם לב אליו בגוף?",
+    automaticThought: "מחשבה לא מועילה",
+    automaticThoughtPlaceholder: "למשל: אני לעולם לא אהיה מספיק טוב בעבודה",
+    beliefLevel: "עד כמה אתה מאמין בזה?",
+    levelLabel: "רמת האמונה",
+    interpretation: "פירוש",
+    interpretationHint: "איך פירשת את מה שקרה? איזו משמעות הייתה לזה עבורך?",
+    pastExperiences: "חוויות מהעבר",
+    pastExperiencesHint: "אילו חוויות עבר משפיעות על הפירוש הזה?",
+    beliefs: "אמונות בסיסיות",
+    consequence: "תוצאה / התנהגות",
+    consequenceHint: "מה עשית (או רצית לעשות) כתוצאה מכך?",
+    step4Title: "זיהוי והערכה",
+    step4Subtitle: "שאל את עצמך שאלות לגבי הראיות וחשוף מלכודות חשיבה.",
+    evidenceFor: "ראיות התומכות במחשבה",
+    evidenceAgainst: "ראיות נגד המחשבה",
+    cognitiveDistortions: "עיוותי חשיבה",
+    distortionsHint: "בחר את מלכודות החשיבה שאתה מזהה במחשבה הזו.",
+    step5Title: "התמודדות טובה יותר",
+    step5Subtitle: "צור מחשבה מאוזנת ומציאותית יותר.",
+    balancedThought: "מחשבה חלופית מאוזנת",
+    balancedThoughtPlaceholder: "למשל: אני עדיין לומד ומשתפר. טעות אחת לא מגדירה את היכולות שלי",
+    newEmotionBehavior: "רגש והתנהגות חדשים",
+    newEmotionBehaviorHint: "כשיש לך את המחשבה המאוזנת, איך אתה מרגיש ומה אתה עושה עכשיו?",
+    nextAction: "מה תעשה אחרת?",
+    step6Title: "איך אתה מרגיש עכשיו?",
+    step6Subtitle: "בחר שוב את הרגשות שלך וחזור על דירוג עוצמתם.",
+    exerciseReview: "סקירת התרגיל",
+    savedOnDevice: "נשמר במכשיר זה.",
+    thoughtRecord: "רשומת מחשבה",
+    back: "חזרה",
+    next: "הבא",
+    historyLink: "צפה ברשומות קודמות ←",
+    needsLink: "זרימת רגשות וצרכים ←",
+    followUp: "❤ מעקב",
+    seeResults: "הצג תוצאות",
+    stepOf: "שלב",
+    of: "מתוך",
+    pastEntries: "רשומות קודמות",
+    historySubtitle: "הכל שאתה שמרת במכשיר הזה.",
+    newEntryLink: "← רשומה חדשה",
+    mainCbtLink: "← חזרה לטופס ה-CBT הראשי",
+    needsAppSubtitle: "עקוב אחרי מה שמסתתר מאחורי הרגש ומה עשוי לעזור.",
+    needsStep1Title: "המצב",
+    needsStep1Subtitle: "התחל ביסודות, ואז בחר את הרגשות שברצונך לחקור.",
+    needsTitlePlaceholder: "למשל: שיחה עם בן/בת הזוג",
+    needsSituationHint: "מה קרה ומה היה הגורם?",
+    needsSelectFeelingLabel: "בחר את הרגשות שברצונך לחקור",
+    needsSelectFeelingHint: "בחר כל רגש שמרגיש לך נכון עכשיו.",
+    needsStep2Title: "מה עומד מאחורי הרגש הזה?",
+    needsStep2Subtitle: "עבור כל רגש שנבחר, חשוב להבחין במה שמסתתר מתחתיו ולזהות את הצרכים שמאחוריו.",
+    needsStep3Title: "מה יספק את הצורך הזה?",
+    needsStep3Subtitle: "עבור כל רגש, בחר את הצורך המתאים ותאר מה יכול לעזור.",
+    needsStep4Title: "רגשות שוב",
+    needsStep4Subtitle: "סקירה קצרה של הרגשות שחקרת ומה הם מצביעים עליהם.",
+    saveMessage: "בחר לפחות רגש אחד כדי להמשיך.",
+    saveMessage2: "ענה על השאלה לגבי כל רגש נבחר לפני שתמשיך.",
+    saveMessage3: "בחר צורך ותאר מה יספק אותו עבור כל רגש.",
+    noFeelings: "עדיין לא נבחרו רגשות.",
+    behindLabel: "מה עומד מאחורי הרגש הזה?",
+    needsBehindLabel: "מהו הצורך שמאחורי הרגש הזה?",
+    needHint: "החזק Ctrl/Cmd כדי לבחור יותר מאחד.",
+    emotionLabel: "רגש",
+    selectNeedLabel: "בחר צורך",
+    chooseNeed: "בחר צורך",
+    whatWillGiveLabel: "מה ייתן לך את הצורך הזה?",
+    noNeedSelected: "לא נבחר צורך בשלב הקודם",
+    feelingReviewTitle: "מה עומד מאחורי הרגש:",
+    needsReviewTitle: "צרכים שמאחורי הרגש:",
+    selectedNeedTitle: "הצורך שנבחר:",
+    whatWillGiveReview: "מה ייתן לך את הצורך הזה:",
+    notFilled: "לא מולא",
+    noNeedsSelected: "לא נבחרו צרכים"
+  }
+};
+
+const state = {
+  level: 50,
+  intensities: { before: new Map(), after: new Map() },
+  distortions: new Set(),
+};
+
+function renderLevelBarHtml(value) {
+  return `<div class="level-slider" style="pointer-events:none">
+    <div class="track"></div>
+    <div class="fill" style="width:${value}%"></div>
+  </div>`;
+}
+
+function initLevelSlider() {
+  const input = document.getElementById("level");
+  const fill = document.getElementById("level-fill");
+  const value = document.getElementById("level-value");
+  const update = () => {
+    state.level = Number(input.value);
+    fill.style.width = `${state.level}%`;
+    value.textContent = state.level;
+  };
+  input.addEventListener("input", update);
+  update();
+}
+
+function renderEmotionGrid(containerId, group) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+  const grid = document.createElement("div");
+  grid.className = "emotion-grid";
+
+  MIXED_EMOTIONS.forEach(({ en, he, color }) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = `${en} (${he})`;
+    btn.style.setProperty("--c", color);
+    btn.addEventListener("click", () => {
+      const map = state.intensities[group];
+      if (map.has(en)) {
+        map.delete(en);
+        btn.classList.remove("selected");
+      } else {
+        map.set(en, 50);
+        btn.classList.add("selected");
+      }
+      renderIntensityList(group);
+    });
+    grid.appendChild(btn);
+  });
+
+  container.appendChild(grid);
+}
+
+function renderIntensityList(group) {
+  const listId = group === "before" ? "intensity-before" : "intensity-after";
+  const container = document.getElementById(listId);
+  container.innerHTML = "";
+  state.intensities[group].forEach((value, emotion) => {
+    const he = EMOTION_MAP.get(emotion);
+    const color = EMOTION_COLOR.get(emotion);
+    const chip = document.createElement("div");
+    chip.className = "intensity-chip";
+    chip.style.background = color;
+    chip.innerHTML = `
+      <span>${emotion} (${he})</span>
+      <input type="range" min="0" max="100" value="${value}">
+      <span class="pct">${value}%</span>
+    `;
+    const range = chip.querySelector("input[type=range]");
+    const pct = chip.querySelector(".pct");
+    range.addEventListener("input", () => {
+      state.intensities[group].set(emotion, Number(range.value));
+      pct.textContent = `${range.value}%`;
+    });
+    container.appendChild(chip);
+  });
+}
+
+function renderDistortions() {
+  const container = document.getElementById("distortion-list");
+  container.innerHTML = "";
+  DISTORTIONS.forEach(([name, desc]) => {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "chip";
+    chip.innerHTML = `${name}<span class="d-desc">${desc}</span>`;
+    chip.addEventListener("click", () => {
+      if (state.distortions.has(name)) {
+        state.distortions.delete(name);
+        chip.classList.remove("selected");
+      } else {
+        state.distortions.add(name);
+        chip.classList.add("selected");
+      }
+    });
+    container.appendChild(chip);
+  });
+}
+
+function t(key) {
+  const lang = localStorage.getItem(LANG_KEY) || "en";
+  return (TEXT[lang] && TEXT[lang][key]) || TEXT.en[key] || key;
+}
+
+function applyLanguage(lang) {
+  const dict = TEXT[lang] || TEXT.en;
+  document.documentElement.lang = lang;
+  localStorage.setItem(LANG_KEY, lang);
+
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    const key = el.dataset.i18n;
+    if (dict[key]) {
+      if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
+        el.value = dict[key];
+      } else {
+        el.textContent = dict[key];
+      }
+    }
+  });
+
+  document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+    const key = el.dataset.i18nPlaceholder;
+    if (dict[key]) el.placeholder = dict[key];
+  });
+
+  const selector = document.getElementById("language-select");
+  if (selector) selector.value = lang;
+}
+
+function renderProgress() {
+  const fill = document.getElementById("progress-fill");
+  const label = document.getElementById("progress-label");
+  fill.style.width = `${(currentStep / totalSteps) * 100}%`;
+  label.textContent = `${t("stepOf")} ${currentStep} ${t("of")} ${totalSteps}`;
+}
+
+function emotionChipsHtml(list) {
+  if (!list.length) return `<span class="r-empty">None selected.</span>`;
+  return list
+    .map((e) => `<span class="review-chip" style="background:${e.color};border-color:${e.color};color:#fff">${e.emotion} ${e.intensity}%</span>`)
+    .join("");
+}
+
+function textCardHtml(title, text) {
+  return `
+    <div class="timeline-item">
+      <div class="timeline-node"></div>
+      <div class="review-card">
+        <div class="r-title">${title}</div>
+        ${text ? `<div class="r-text">${text}</div>` : `<span class="r-empty">Not filled in.</span>`}
+      </div>
+    </div>
+  `;
+}
+
+function renderReview(entry) {
+  const timeline = document.getElementById("review-timeline");
+
+  const distortionsHtml = entry.distortions.length
+    ? entry.distortions.map((d) => `<span class="review-chip">${d}</span>`).join("")
+    : `<span class="r-empty">No thinking traps selected.</span>`;
+
+  timeline.innerHTML = [
+    textCardHtml("Situation", entry.situation),
+    `<div class="timeline-item">
+      <div class="timeline-node"></div>
+      <div class="review-card">
+        <div class="r-title">How You Felt</div>
+        ${emotionChipsHtml(entry.initialEmotions)}
+      </div>
+    </div>`,
+    textCardHtml("Physical Sensations", entry.physicalSensations),
+    `<div class="timeline-item">
+      <div class="timeline-node"></div>
+      <div class="review-card">
+        <div class="r-title">Unhelpful Thought <span class="r-sub">(Your first thought)</span></div>
+        <div class="r-text">${entry.automaticThought || "(no thought recorded)"}</div>
+        <div class="level-row"><span class="level-value">Level: <b>${entry.level}</b>/100</span></div>
+        ${renderLevelBarHtml(entry.level)}
+      </div>
+    </div>`,
+    textCardHtml("Interpretation", entry.interpretation),
+    textCardHtml("Past Experiences", entry.pastExperiences),
+    textCardHtml("Underlying Beliefs", entry.beliefs),
+    textCardHtml("Consequence / Behavior", entry.consequence),
+    textCardHtml("Evidence That Supports the Thought", entry.evidenceFor),
+    textCardHtml("Evidence Against the Thought", entry.evidenceAgainst),
+    `<div class="timeline-item">
+      <div class="timeline-node"></div>
+      <div class="review-card">
+        <div class="r-title">Cognitive Distortions</div>
+        ${distortionsHtml}
+      </div>
+    </div>`,
+    textCardHtml("Balanced Alternative Thought", entry.balancedThought),
+    textCardHtml("New Emotion &amp; Behavior", entry.newEmotionBehavior),
+    textCardHtml("What You'll Do Differently", entry.nextAction),
+    `<div class="timeline-item">
+      <div class="timeline-node"></div>
+      <div class="review-card">
+        <div class="r-title">How You Feel Now</div>
+        ${emotionChipsHtml(entry.finalEmotions)}
+      </div>
+    </div>`,
+  ].join("");
+}
+
+function showStep(step) {
+  document.querySelectorAll(".step").forEach((el) => {
+    el.hidden = Number(el.dataset.step) !== step;
+  });
+  const btnPrev = document.getElementById("btn-prev");
+  const btnNext = document.getElementById("btn-next");
+
+  if (step > totalSteps) {
+    document.querySelector(".progress-track").hidden = true;
+    document.getElementById("progress-label").hidden = true;
+    btnPrev.hidden = true;
+    btnNext.textContent = t("followUp");
+  } else {
+    document.querySelector(".progress-track").hidden = false;
+    document.getElementById("progress-label").hidden = false;
+    btnPrev.hidden = false;
+    btnPrev.style.visibility = step === 1 ? "hidden" : "visible";
+    btnPrev.textContent = t("back");
+    btnNext.textContent = step === totalSteps ? t("seeResults") : t("next");
+    renderProgress();
+  }
+}
+
+function mapToList(map) {
+  return [...map.entries()].map(([emotion, intensity]) => ({
+    emotion,
+    intensity,
+    color: EMOTION_COLOR.get(emotion),
+  }));
+}
+
+function val(id) {
+  return document.getElementById(id).value.trim();
+}
+
+function collectEntry() {
+  return {
+    id: Date.now(),
+    title: val("title"),
+    date: document.getElementById("date").value,
+    situation: val("situation"),
+    initialEmotions: mapToList(state.intensities.before),
+    physicalSensations: val("physicalSensations"),
+    automaticThought: val("automaticThought"),
+    level: state.level,
+    interpretation: val("interpretation"),
+    pastExperiences: val("pastExperiences"),
+    beliefs: val("beliefs"),
+    consequence: val("consequence"),
+    evidenceFor: val("evidenceFor"),
+    evidenceAgainst: val("evidenceAgainst"),
+    distortions: [...state.distortions],
+    balancedThought: val("balancedThought"),
+    newEmotionBehavior: val("newEmotionBehavior"),
+    nextAction: val("nextAction"),
+    finalEmotions: mapToList(state.intensities.after),
+    followedUp: false,
+  };
+}
+
+function saveEntry(entry) {
+  const entries = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+  entries.push(entry);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+}
+
+function markLastEntryFollowedUp() {
+  const entries = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+  if (!entries.length) return;
+  entries[entries.length - 1].followedUp = true;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+}
+
+document.getElementById("btn-next").addEventListener("click", () => {
+  if (currentStep === totalSteps) {
+    const entry = collectEntry();
+    saveEntry(entry);
+    renderReview(entry);
+    currentStep = totalSteps + 1;
+    showStep(currentStep);
+    return;
+  }
+
+  if (currentStep > totalSteps) {
+    if (!followedUp) {
+      followedUp = true;
+      document.getElementById("btn-next").textContent = "✓ Follow-up scheduled";
+      document.getElementById("btn-next").disabled = true;
+      markLastEntryFollowedUp();
+    }
+    return;
+  }
+
+  currentStep++;
+  showStep(currentStep);
+});
+
+document.getElementById("btn-prev").addEventListener("click", () => {
+  if (currentStep <= 1) return;
+  currentStep--;
+  showStep(currentStep);
+});
+
+const languageSelect = document.getElementById("language-select");
+if (languageSelect) {
+  languageSelect.addEventListener("change", (event) => applyLanguage(event.target.value));
+}
+
+const savedLang = localStorage.getItem(LANG_KEY) || "en";
+applyLanguage(savedLang);
+document.getElementById("date").valueAsDate = new Date();
+initLevelSlider();
+renderEmotionGrid("emotions-before", "before");
+renderEmotionGrid("emotions-after", "after");
+renderDistortions();
+showStep(currentStep);

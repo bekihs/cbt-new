@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CBT Companion - History</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+<div class="wrap-card">
+
+  <header class="app-header">
+    <div class="header-badge">&#9776;</div>
+    <div class="header-copy">
+      <h1 data-i18n="historyTitle">Past Entries</h1>
+      <p data-i18n="historySubtitle">Everything you've saved on this device.</p>
+    </div>
+    <div class="header-lang">
+      <select id="language-select" class="language-select" aria-label="Language">
+        <option value="en">EN</option>
+        <option value="he">HE</option>
+      </select>
+    </div>
+  </header>
+
+  <div id="entries"></div>
+
+</div>
+  <div class="footer-link">
+    <a href="index.html" data-i18n="newEntryLink">&larr; New entry</a>
+  </div>
+</div>
+<script src="history.js"></script>
+</body>
+</html>
