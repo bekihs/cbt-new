@@ -5,8 +5,8 @@ const FEELINGS_DRAFT_KEY = "cbtFeelingsDraft";
 const TEXT = {
   en: {
     needsAppSubtitle: "Trace what is underneath the feeling and what may help.",
-    needsStep1Title: "The Situation",
-    needsStep1Subtitle: "Start with the basics, then choose the emotions you want to explore.",
+    needsStep1Title: "Selected feelings",
+    needsStep1Subtitle: "These are the feelings you chose. Explore what sits underneath each one.",
     title: "Title",
     optionalText: "(optional)",
     date: "Date",
@@ -51,8 +51,8 @@ const TEXT = {
   },
   he: {
     needsAppSubtitle: "עקוב אחרי מה שמסתתר מאחורי הרגש ומה עשוי לעזור.",
-    needsStep1Title: "המצב",
-    needsStep1Subtitle: "התחל ביסודות, ואז בחר את הרגשות שברצונך לחקור.",
+    needsStep1Title: "רגשות נבחרים",
+    needsStep1Subtitle: "אלו הרגשות שבחרת. חקור מה עומד מאחורי כל אחד מהם.",
     title: "כותרת",
     optionalText: "(לא חובה)",
     date: "תאריך",
@@ -97,24 +97,52 @@ const TEXT = {
   }
 };
 
-const NEEDS = [
-  { value: "connection", label: "Connection / love" },
-  { value: "understanding", label: "Understanding" },
-  { value: "acceptance", label: "Acceptance" },
-  { value: "safety", label: "Safety / security" },
-  { value: "autonomy", label: "Autonomy / choice" },
-  { value: "honesty", label: "Honesty / authenticity" },
-  { value: "peace", label: "Peace / calm" },
-  { value: "rest", label: "Rest / recovery" },
-  { value: "play", label: "Play / joy" },
-  { value: "nourishment", label: "Nourishment / care" },
-  { value: "meaning", label: "Meaning / purpose" },
-  { value: "contribution", label: "Contribution / impact" },
-  { value: "competence", label: "Competence / mastery" },
-  { value: "support", label: "Support / encouragement" },
-  { value: "recognition", label: "Recognition / appreciation" },
-  { value: "comfort", label: "Comfort / ease" }
-];
+const NEEDS = {
+  en: [
+    { value: "connection", label: "Connection / love" },
+    { value: "understanding", label: "Understanding" },
+    { value: "acceptance", label: "Acceptance" },
+    { value: "safety", label: "Safety / security" },
+    { value: "autonomy", label: "Autonomy / choice" },
+    { value: "honesty", label: "Honesty / authenticity" },
+    { value: "peace", label: "Peace / calm" },
+    { value: "rest", label: "Rest / recovery" },
+    { value: "play", label: "Play / joy" },
+    { value: "nourishment", label: "Nourishment / care" },
+    { value: "meaning", label: "Meaning / purpose" },
+    { value: "contribution", label: "Contribution / impact" },
+    { value: "competence", label: "Competence / mastery" },
+    { value: "support", label: "Support / encouragement" },
+    { value: "recognition", label: "Recognition / appreciation" },
+    { value: "comfort", label: "Comfort / ease" }
+  ],
+  he: [
+    { value: "connection", label: "חיבור / אהבה" },
+    { value: "understanding", label: "הבנה" },
+    { value: "acceptance", label: "קבלה" },
+    { value: "safety", label: "ביטחון / תחושת ביטחון" },
+    { value: "autonomy", label: "אוטונומיה / בחירה" },
+    { value: "honesty", label: "יושר / אותנטיות" },
+    { value: "peace", label: "שקט / רוגע" },
+    { value: "rest", label: "מנוחה / התאוששות" },
+    { value: "play", label: "משחק / שמחה" },
+    { value: "nourishment", label: "הזנה / טיפול" },
+    { value: "meaning", label: "משמעות / מטרה" },
+    { value: "contribution", label: "תרומה / השפעה" },
+    { value: "competence", label: "מיומנות / שליטה" },
+    { value: "support", label: "תמיכה / עידוד" },
+    { value: "recognition", label: "הכרה / הערכה" },
+    { value: "comfort", label: "נוחות / רווחה" }
+  ]
+};
+
+function getNeedsList(lang = localStorage.getItem(LANG_KEY) || "en") {
+  return NEEDS[lang] || NEEDS.en;
+}
+
+function getNeedLabel(value, lang = localStorage.getItem(LANG_KEY) || "en") {
+  return getNeedsList(lang).find((need) => need.value === value)?.label || value;
+}
 
 const FEELINGS = [
   "Angry", "Anxious", "Ashamed", "Betrayed", "Bored", "Confused", "Content",
@@ -182,6 +210,10 @@ function applyLanguage(lang) {
 
   const selector = document.getElementById("language-select");
   if (selector) selector.value = lang;
+
+  renderStepTwo();
+  renderStepThree();
+  renderStepFour();
 }
 
 function renderProgress() {
@@ -222,9 +254,11 @@ function renderStepTwo() {
     return;
   }
 
+  const lang = localStorage.getItem(LANG_KEY) || "en";
+
   container.innerHTML = state.selectedFeelings.map((feeling) => {
     const detail = getDetail(feeling);
-    const needOptions = NEEDS.map((need) => `
+    const needOptions = getNeedsList(lang).map((need) => `
       <option value="${need.value}" ${detail.needs.includes(need.value) ? "selected" : ""}>${need.label}</option>
     `).join("");
 
@@ -273,14 +307,16 @@ function renderStepThree() {
     return;
   }
 
+  const lang = localStorage.getItem(LANG_KEY) || "en";
+
   container.innerHTML = state.selectedFeelings.map((feeling) => {
     const detail = getDetail(feeling);
-    const visibleNeeds = NEEDS.filter((need) => detail.needs.includes(need.value));
+    const visibleNeeds = getNeedsList(lang).filter((need) => detail.needs.includes(need.value));
     const needOptions = visibleNeeds.length
       ? visibleNeeds.map((need) => `
           <option value="${need.value}" ${detail.selectedNeed === need.value ? "selected" : ""}>${need.label}</option>
         `).join("")
-      : '<option value="">No need selected in the previous step</option>';
+      : `<option value="">${t("noNeedSelected")}</option>`;
 
     return `
       <div class="needs-card">
@@ -326,11 +362,13 @@ function renderStepThree() {
 function renderStepFour() {
   const container = document.getElementById("step-four-content");
   if (!container) return;
+  const lang = localStorage.getItem(LANG_KEY) || "en";
+
   container.innerHTML = state.selectedFeelings.map((feeling) => {
     const detail = getDetail(feeling);
-    const needLabel = NEEDS.find((need) => need.value === detail.selectedNeed)?.label || t("noNeedSelected");
+    const needLabel = getNeedLabel(detail.selectedNeed, lang) || t("noNeedSelected");
     const needList = detail.needs.length
-      ? detail.needs.map((need) => NEEDS.find((item) => item.value === need)?.label || need).join(", ")
+      ? detail.needs.map((need) => getNeedLabel(need, lang)).join(", ")
       : t("noNeedsSelected");
 
     return `
@@ -346,16 +384,26 @@ function renderStepFour() {
 }
 
 function showStep(step) {
-  document.querySelectorAll(".needs-step").forEach((el) => {
+  const steps = document.querySelectorAll(".needs-step");
+  if (!steps.length) return;
+
+  steps.forEach((el) => {
     el.hidden = Number(el.dataset.step) !== step;
   });
 
   const prevBtn = document.getElementById("needs-btn-prev");
   const nextBtn = document.getElementById("needs-btn-next");
 
-  prevBtn.hidden = step === 1;
-  prevBtn.textContent = t("back");
-  nextBtn.textContent = step === totalSteps ? "Finish" : t("next");
+  if (prevBtn) {
+    prevBtn.hidden = step === 1;
+    prevBtn.textContent = t("back");
+  }
+
+  if (nextBtn) {
+    nextBtn.textContent = step === totalSteps ? "Finish" : t("next");
+    nextBtn.disabled = false;
+  }
+
   renderProgress();
 }
 
@@ -393,12 +441,16 @@ function validateCurrentStep() {
 }
 
 function collectNeedsEntry() {
+  const titleInput = document.getElementById("needs-title");
+  const dateInput = document.getElementById("needs-date");
+  const situationInput = document.getElementById("needs-situation");
+
   return {
     id: Date.now(),
     type: "needs",
-    title: document.getElementById("needs-title").value.trim(),
-    date: document.getElementById("needs-date").value,
-    situation: document.getElementById("needs-situation").value.trim(),
+    title: titleInput ? titleInput.value.trim() : "",
+    date: dateInput ? dateInput.value : "",
+    situation: situationInput ? situationInput.value.trim() : "",
     feelings: state.selectedFeelings.map((feeling) => {
       const detail = getDetail(feeling);
       return {
@@ -458,7 +510,9 @@ document.getElementById("needs-btn-prev").addEventListener("click", handlePrev);
 
 const languageSelect = document.getElementById("language-select");
 if (languageSelect) {
-  languageSelect.addEventListener("change", (event) => applyLanguage(event.target.value));
+  languageSelect.addEventListener("change", (event) => {
+    applyLanguage(event.target.value);
+  });
 }
 
 const savedFeelingsDraft = JSON.parse(localStorage.getItem(FEELINGS_DRAFT_KEY) || "[]");
@@ -468,7 +522,8 @@ if (Array.isArray(savedFeelingsDraft) && savedFeelingsDraft.length) {
 
 const savedLang = localStorage.getItem(LANG_KEY) || "en";
 applyLanguage(savedLang);
-document.getElementById("needs-date").valueAsDate = new Date();
+const needsDate = document.getElementById("needs-date");
+if (needsDate) needsDate.valueAsDate = new Date();
 renderEmotionPicker();
 renderStepTwo();
 renderStepThree();
