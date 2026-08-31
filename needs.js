@@ -1,5 +1,6 @@
 const STORAGE_KEY = "cbtEntries";
 const LANG_KEY = "cbtLanguage";
+const FEELINGS_DRAFT_KEY = "cbtFeelingsDraft";
 
 const TEXT = {
   en: {
@@ -30,6 +31,7 @@ const TEXT = {
     saveMessage2: "Please answer the reflection for each selected feeling before continuing.",
     saveMessage3: "Please choose a need and describe what would satisfy it for each feeling.",
     noFeelings: "No feelings selected yet.",
+    noFeelingsDraft: "No feelings were selected in the regular flow.",
     behindLabel: "What sits behind this feeling?",
     needsBehindLabel: "What is the need behind this feeling?",
     needHint: "Hold Ctrl/Cmd to select more than one need.",
@@ -43,7 +45,9 @@ const TEXT = {
     selectedNeedTitle: "Selected need:",
     whatWillGiveReview: "What will give you this need:",
     notFilled: "Not filled in",
-    noNeedsSelected: "No needs selected"
+    noNeedsSelected: "No needs selected",
+    writeBehindPrompt: "Write what sits behind this feeling...",
+    describeNeedPrompt: "Describe the change, action, or support that would satisfy this need"
   },
   he: {
     needsAppSubtitle: "עקוב אחרי מה שמסתתר מאחורי הרגש ומה עשוי לעזור.",
@@ -73,6 +77,7 @@ const TEXT = {
     saveMessage2: "ענה על השאלה לגבי כל רגש נבחר לפני שתמשיך.",
     saveMessage3: "בחר צורך ותאר מה יספק אותו עבור כל רגש.",
     noFeelings: "עדיין לא נבחרו רגשות.",
+    noFeelingsDraft: "לא נבחרו רגשות בזרימת ה-CBT הראשית.",
     behindLabel: "מה עומד מאחורי הרגש הזה?",
     needsBehindLabel: "מהו הצורך שמאחורי הרגש הזה?",
     needHint: "החזק Ctrl/Cmd כדי לבחור יותר מאחד.",
@@ -86,7 +91,9 @@ const TEXT = {
     selectedNeedTitle: "הצורך שנבחר:",
     whatWillGiveReview: "מה ייתן לך את הצורך הזה:",
     notFilled: "לא מולא",
-    noNeedsSelected: "לא נבחרו צרכים"
+    noNeedsSelected: "לא נבחרו צרכים",
+    writeBehindPrompt: "כתוב מה עומד מאחורי הרגש הזה...",
+    describeNeedPrompt: "תאר את השינוי, הפעולה או התמיכה שיספקו צורך זה"
   }
 };
 
@@ -186,32 +193,30 @@ function renderProgress() {
 
 function renderEmotionPicker() {
   const container = document.getElementById("needs-emotions");
+  if (!container) return;
   container.innerHTML = "";
-  const grid = document.createElement("div");
-  grid.className = "emotion-grid";
 
-  FEELINGS.forEach((feeling) => {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.textContent = feeling;
-    btn.classList.toggle("selected", state.selectedFeelings.includes(feeling));
-    btn.style.setProperty("--c", "#3ecf8e");
-    btn.addEventListener("click", () => {
-      if (state.selectedFeelings.includes(feeling)) {
-        state.selectedFeelings = state.selectedFeelings.filter((item) => item !== feeling);
-      } else {
-        state.selectedFeelings.push(feeling);
-      }
-      renderEmotionPicker();
-    });
-    grid.appendChild(btn);
+  if (!state.selectedFeelings.length) {
+    container.innerHTML = `<div class="empty-state">${t("noFeelingsDraft")}</div>`;
+    return;
+  }
+
+  const list = document.createElement("div");
+  list.className = "chip-grid";
+
+  state.selectedFeelings.forEach((feeling) => {
+    const chip = document.createElement("div");
+    chip.className = "chip selected";
+    chip.textContent = feeling;
+    list.appendChild(chip);
   });
 
-  container.appendChild(grid);
+  container.appendChild(list);
 }
 
 function renderStepTwo() {
   const container = document.getElementById("step-two-content");
+  if (!container) return;
   if (!state.selectedFeelings.length) {
     container.innerHTML = `<div class="empty-state">${t("noFeelings")}</div>`;
     return;
@@ -228,7 +233,7 @@ function renderStepTwo() {
         <div class="needs-card-header">${feeling}</div>
         <div class="field">
           <label>${t("behindLabel")}</label>
-          <div class="wrap-input"><textarea data-feeling="${feeling}" data-field="behind">${escapeHtml(detail.behind)}</textarea></div>
+          <div class="wrap-input"><textarea data-feeling="${feeling}" data-field="behind" placeholder="${t("writeBehindPrompt")}">${escapeHtml(detail.behind)}</textarea></div>
         </div>
         <div class="field">
           <label>${t("needsBehindLabel")}</label>
@@ -254,12 +259,15 @@ function renderStepTwo() {
     el.addEventListener("change", (event) => {
       const detail = getDetail(event.target.dataset.feeling);
       detail.needs = [...event.target.selectedOptions].map((option) => option.value);
+      renderStepThree();
+      renderStepFour();
     });
   });
 }
 
 function renderStepThree() {
   const container = document.getElementById("step-three-content");
+  if (!container) return;
   if (!state.selectedFeelings.length) {
     container.innerHTML = `<div class="empty-state">${t("noFeelings")}</div>`;
     return;
@@ -292,7 +300,7 @@ function renderStepThree() {
         </div>
         <div class="field">
           <label>${t("whatWillGiveLabel")}</label>
-          <div class="wrap-input"><textarea data-feeling="${feeling}" data-field="whatWillGive" placeholder="Describe the change, action, or support that would satisfy this need">${escapeHtml(detail.whatWillGive)}</textarea></div>
+          <div class="wrap-input"><textarea data-feeling="${feeling}" data-field="whatWillGive" placeholder="${t("describeNeedPrompt")}">${escapeHtml(detail.whatWillGive)}</textarea></div>
         </div>
       </div>
     `;
@@ -302,6 +310,7 @@ function renderStepThree() {
     el.addEventListener("change", (event) => {
       const detail = getDetail(event.target.dataset.feeling);
       detail.selectedNeed = event.target.value;
+      renderStepFour();
     });
   });
 
@@ -309,12 +318,14 @@ function renderStepThree() {
     el.addEventListener("input", (event) => {
       const detail = getDetail(event.target.dataset.feeling);
       detail.whatWillGive = event.target.value;
+      renderStepFour();
     });
   });
 }
 
 function renderStepFour() {
   const container = document.getElementById("step-four-content");
+  if (!container) return;
   container.innerHTML = state.selectedFeelings.map((feeling) => {
     const detail = getDetail(feeling);
     const needLabel = NEEDS.find((need) => need.value === detail.selectedNeed)?.label || t("noNeedSelected");
@@ -411,17 +422,26 @@ function saveNeedsEntry() {
 function handleNext() {
   if (!validateCurrentStep()) return;
 
-  if (currentStep === totalSteps) {
-    saveNeedsEntry();
-    renderStepFour();
-    document.getElementById("needs-btn-next").textContent = "Saved";
-    document.getElementById("needs-btn-next").disabled = true;
-    document.getElementById("needs-btn-prev").hidden = true;
-    return;
+  if (currentStep === 1) {
+    renderStepTwo();
   }
 
-  if (currentStep === 2) renderStepThree();
-  if (currentStep === 3) renderStepFour();
+  if (currentStep === 2) {
+    renderStepThree();
+  }
+
+  if (currentStep === 3) {
+    renderStepFour();
+  }
+
+  if (currentStep === totalSteps) {
+    saveNeedsEntry();
+    const returnToStep = Number(localStorage.getItem("cbtNeedsReturnToStep") || "6");
+    localStorage.removeItem("cbtFeelingsDraft");
+    localStorage.removeItem("cbtNeedsReturnToStep");
+    window.location.href = `index.html#step${returnToStep}`;
+    return;
+  }
 
   currentStep += 1;
   showStep(currentStep);
@@ -439,6 +459,11 @@ document.getElementById("needs-btn-prev").addEventListener("click", handlePrev);
 const languageSelect = document.getElementById("language-select");
 if (languageSelect) {
   languageSelect.addEventListener("change", (event) => applyLanguage(event.target.value));
+}
+
+const savedFeelingsDraft = JSON.parse(localStorage.getItem(FEELINGS_DRAFT_KEY) || "[]");
+if (Array.isArray(savedFeelingsDraft) && savedFeelingsDraft.length) {
+  state.selectedFeelings = savedFeelingsDraft;
 }
 
 const savedLang = localStorage.getItem(LANG_KEY) || "en";

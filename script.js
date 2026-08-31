@@ -110,6 +110,7 @@ const DISTORTIONS = [
 
 const STORAGE_KEY = "cbtEntries";
 const LANG_KEY = "cbtLanguage";
+const FEELINGS_DRAFT_KEY = "cbtFeelingsDraft";
 const totalSteps = 6;
 let currentStep = 1;
 let followedUp = false;
@@ -167,6 +168,7 @@ const TEXT = {
     needsLink: "Feelings & needs flow →",
     followUp: "❤ Follow Up",
     seeResults: "See Results",
+    feelingsElaborate: "Feelings elaborate",
     stepOf: "Step",
     of: "of",
     pastEntries: "Past Entries",
@@ -243,6 +245,7 @@ const TEXT = {
     needsLink: "זרימת רגשות וצרכים ←",
     followUp: "❤ מעקב",
     seeResults: "הצג תוצאות",
+    feelingsElaborate: "פיתוח רגשות",
     stepOf: "שלב",
     of: "מתוך",
     pastEntries: "רשומות קודמות",
@@ -320,6 +323,9 @@ function renderEmotionGrid(containerId, group) {
     btn.type = "button";
     btn.textContent = `${en} (${he})`;
     btn.style.setProperty("--c", color);
+    btn.addEventListener("pointerdown", (event) => {
+      event.preventDefault();
+    });
     btn.addEventListener("click", () => {
       const map = state.intensities[group];
       if (map.has(en)) {
@@ -497,12 +503,14 @@ function showStep(step) {
   });
   const btnPrev = document.getElementById("btn-prev");
   const btnNext = document.getElementById("btn-next");
+  const btnFeelingsElaborate = document.getElementById("btn-feelings-elaborate");
 
   if (step > totalSteps) {
     document.querySelector(".progress-track").hidden = true;
     document.getElementById("progress-label").hidden = true;
     btnPrev.hidden = true;
     btnNext.textContent = t("followUp");
+    if (btnFeelingsElaborate) btnFeelingsElaborate.style.display = "none";
   } else {
     document.querySelector(".progress-track").hidden = false;
     document.getElementById("progress-label").hidden = false;
@@ -510,7 +518,17 @@ function showStep(step) {
     btnPrev.style.visibility = step === 1 ? "hidden" : "visible";
     btnPrev.textContent = t("back");
     btnNext.textContent = step === totalSteps ? t("seeResults") : t("next");
+    if (btnFeelingsElaborate) {
+      const showElaborationButton = step === 2;
+      btnFeelingsElaborate.style.display = showElaborationButton ? "inline-flex" : "none";
+      btnFeelingsElaborate.textContent = t("feelingsElaborate");
+    }
     renderProgress();
+  }
+
+  const stepHash = `#step${step}`;
+  if (window.location.hash !== stepHash && step <= totalSteps) {
+    history.replaceState(null, "", stepHash);
   }
 }
 
@@ -588,10 +606,28 @@ document.getElementById("btn-next").addEventListener("click", () => {
   showStep(currentStep);
 });
 
+document.getElementById("btn-feelings-elaborate").addEventListener("click", () => {
+  const feelings = [...state.intensities.before.keys()];
+  localStorage.setItem(FEELINGS_DRAFT_KEY, JSON.stringify(feelings));
+  localStorage.setItem("cbtNeedsReturnToStep", "6");
+  window.location.href = "needs.html";
+});
+
 document.getElementById("btn-prev").addEventListener("click", () => {
   if (currentStep <= 1) return;
   currentStep--;
   showStep(currentStep);
+});
+
+window.addEventListener("hashchange", () => {
+  const match = /^#step(\d+)$/i.exec(window.location.hash || "");
+  if (match) {
+    const step = Number(match[1]);
+    if (step >= 1 && step <= totalSteps) {
+      currentStep = step;
+      showStep(currentStep);
+    }
+  }
 });
 
 const languageSelect = document.getElementById("language-select");
@@ -606,4 +642,9 @@ initLevelSlider();
 renderEmotionGrid("emotions-before", "before");
 renderEmotionGrid("emotions-after", "after");
 renderDistortions();
+const hashMatch = /^#step(\d+)$/i.exec(window.location.hash || "");
+if (hashMatch) {
+  const hashStep = Number(hashMatch[1]);
+  if (hashStep >= 1 && hashStep <= totalSteps) currentStep = hashStep;
+}
 showStep(currentStep);

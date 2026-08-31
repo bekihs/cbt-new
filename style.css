@@ -161,6 +161,8 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); font-weigh
 }
 
 .emotion-grid button {
+  position: relative;
+  z-index: 1;
   padding: 7px 6px;
   border: 1.5px solid var(--c, var(--border));
   border-radius: 999px;
@@ -169,7 +171,15 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); font-weigh
   font-size: 0.74rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  pointer-events: auto;
+  transition: background 0.15s, color 0.15s, transform 0.15s ease;
+}
+
+.emotion-grid button:active {
+  transform: scale(0.98);
 }
 
 .emotion-grid button.selected {
