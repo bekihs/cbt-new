@@ -114,7 +114,14 @@ const NEEDS = {
     { value: "competence", label: "Competence / mastery" },
     { value: "support", label: "Support / encouragement" },
     { value: "recognition", label: "Recognition / appreciation" },
-    { value: "comfort", label: "Comfort / ease" }
+    { value: "comfort", label: "Comfort / ease" },
+    { value: "privacy", label: "Privacy / space" },
+    { value: "trust", label: "Trust / reliability" },
+    { value: "fairness", label: "Fairness / justice" },
+    { value: "expression", label: "Expression / voice" },
+    { value: "freedom", label: "Freedom / independence" },
+    { value: "structure", label: "Structure / order" },
+    { value: "spirituality", label: "Spirituality / meaning" }
   ],
   he: [
     { value: "connection", label: "חיבור / אהבה" },
@@ -132,7 +139,14 @@ const NEEDS = {
     { value: "competence", label: "מיומנות / שליטה" },
     { value: "support", label: "תמיכה / עידוד" },
     { value: "recognition", label: "הכרה / הערכה" },
-    { value: "comfort", label: "נוחות / רווחה" }
+    { value: "comfort", label: "נוחות / רווחה" },
+    { value: "privacy", label: "פרטיות / מרחב" },
+    { value: "trust", label: "אמון / מהימנות" },
+    { value: "fairness", label: "הוגנות / צדק" },
+    { value: "expression", label: "ביטוי / קול" },
+    { value: "freedom", label: "חירות / עצמאות" },
+    { value: "structure", label: "סדר / ארגון" },
+    { value: "spirituality", label: "רוחניות / משמעות" }
   ]
 };
 
@@ -190,6 +204,8 @@ function t(key) {
 function applyLanguage(lang) {
   const dict = TEXT[lang] || TEXT.en;
   document.documentElement.lang = lang;
+  document.documentElement.dir = lang === "he" ? "rtl" : "ltr";
+  document.body.classList.toggle("rtl", lang === "he");
   localStorage.setItem(LANG_KEY, lang);
 
   document.querySelectorAll("[data-i18n]").forEach((el) => {
@@ -407,39 +423,6 @@ function showStep(step) {
   renderProgress();
 }
 
-function validateCurrentStep() {
-  if (currentStep === 1 && !state.selectedFeelings.length) {
-    alert(t("saveMessage"));
-    return false;
-  }
-
-  if (currentStep === 2) {
-    const hasMissingFeeling = state.selectedFeelings.some((feeling) => {
-      const detail = getDetail(feeling);
-      return !detail.behind.trim() || !detail.needs.length;
-    });
-
-    if (hasMissingFeeling) {
-      alert(t("saveMessage2"));
-      return false;
-    }
-  }
-
-  if (currentStep === 3) {
-    const hasMissingNeed = state.selectedFeelings.some((feeling) => {
-      const detail = getDetail(feeling);
-      return !detail.selectedNeed || !detail.whatWillGive.trim();
-    });
-
-    if (hasMissingNeed) {
-      alert(t("saveMessage3"));
-      return false;
-    }
-  }
-
-  return true;
-}
-
 function collectNeedsEntry() {
   const titleInput = document.getElementById("needs-title");
   const dateInput = document.getElementById("needs-date");
@@ -472,8 +455,6 @@ function saveNeedsEntry() {
 }
 
 function handleNext() {
-  if (!validateCurrentStep()) return;
-
   if (currentStep === 1) {
     renderStepTwo();
   }
