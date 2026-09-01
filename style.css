@@ -81,15 +81,24 @@ header.app-header {
 }
 
 .header-badge {
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
-  border-radius: 50%;
-  background: var(--bg);
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #f7fafc 0%, #edf6f1 100%);
+  border: 1px solid rgba(62, 207, 142, 0.18);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1rem;
+  font-size: 1.15rem;
+  color: var(--text-dark);
+  text-decoration: none;
+  box-shadow: 0 6px 16px rgba(62, 207, 142, 0.08);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.header-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(62, 207, 142, 0.12);
 }
 
 header.app-header h1 { font-size: 1.05rem; margin: 0; font-weight: 700; }
@@ -274,8 +283,22 @@ button.btn.secondary {
 button.btn.secondary:hover { background: var(--border); opacity: 1; }
 
 .footer-link { text-align: center; margin-top: 16px; }
-.footer-link a { color: var(--text-muted); font-size: 0.83rem; text-decoration: none; }
-.footer-link a:hover { color: var(--text-dark); }
+.footer-link a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 0.83rem;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 999px;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+.footer-link a:hover {
+  color: var(--text-dark);
+  background: rgba(62, 207, 142, 0.08);
+  transform: translateY(-1px);
+}
 
 /* Review timeline (matches CBT Companion "Exercise Review" screen) */
 .review-eyebrow { font-size: 0.78rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 14px; }

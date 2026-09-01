@@ -397,6 +397,8 @@ function t(key) {
 function applyLanguage(lang) {
   const dict = TEXT[lang] || TEXT.en;
   document.documentElement.lang = lang;
+  document.documentElement.dir = lang === "he" ? "rtl" : "ltr";
+  document.body.classList.toggle("rtl", lang === "he");
   localStorage.setItem(LANG_KEY, lang);
 
   document.querySelectorAll("[data-i18n]").forEach((el) => {
@@ -609,7 +611,7 @@ document.getElementById("btn-next").addEventListener("click", () => {
 document.getElementById("btn-feelings-elaborate").addEventListener("click", () => {
   const feelings = [...state.intensities.before.keys()];
   localStorage.setItem(FEELINGS_DRAFT_KEY, JSON.stringify(feelings));
-  localStorage.setItem("cbtNeedsReturnToStep", "6");
+  localStorage.setItem("cbtNeedsReturnToStep", "3");
   window.location.href = "needs.html";
 });
 
