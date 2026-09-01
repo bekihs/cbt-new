@@ -274,9 +274,15 @@ function renderStepTwo() {
 
   container.innerHTML = state.selectedFeelings.map((feeling) => {
     const detail = getDetail(feeling);
-    const needOptions = getNeedsList(lang).map((need) => `
-      <option value="${need.value}" ${detail.needs.includes(need.value) ? "selected" : ""}>${need.label}</option>
+    const needCheckboxes = getNeedsList(lang).map((need) => `
+      <label class="needs-checkbox">
+        <input type="checkbox" value="${need.value}" data-feeling="${feeling}" data-field="needs" ${detail.needs.includes(need.value) ? "checked" : ""}>
+        <span>${need.label}</span>
+      </label>
     `).join("");
+    
+    const selectedCount = detail.needs.length;
+    const label = selectedCount ? `${selectedCount} selected` : t("chooseNeed");
 
     return `
       <div class="needs-card">
@@ -287,11 +293,14 @@ function renderStepTwo() {
         </div>
         <div class="field">
           <label>${t("needsBehindLabel")}</label>
-          <span class="hint">${t("needHint")}</span>
-          <div class="wrap-input needs-select-wrap">
-            <select multiple size="8" data-feeling="${feeling}" data-field="needs">
-              ${needOptions}
-            </select>
+          <div class="needs-select-box">
+            <button type="button" class="needs-select-toggle" data-feeling="${feeling}" aria-expanded="false">
+              <span class="toggle-label">${label}</span>
+              <span class="toggle-icon">▼</span>
+            </button>
+            <div class="needs-checkbox-grid" data-feeling="${feeling}" hidden>
+              ${needCheckboxes}
+            </div>
           </div>
         </div>
       </div>
@@ -305,10 +314,32 @@ function renderStepTwo() {
     });
   });
 
-  container.querySelectorAll("select[data-field='needs']").forEach((el) => {
+  container.querySelectorAll(".needs-select-toggle").forEach((btn) => {
+    btn.addEventListener("click", (event) => {
+      event.preventDefault();
+      const feeling = btn.dataset.feeling;
+      const grid = container.querySelector(`.needs-checkbox-grid[data-feeling="${feeling}"]`);
+      if (grid) {
+        grid.hidden = !grid.hidden;
+        btn.setAttribute("aria-expanded", !grid.hidden);
+        btn.classList.toggle("open", !grid.hidden);
+      }
+    });
+  });
+
+  container.querySelectorAll("input[type='checkbox'][data-field='needs']").forEach((el) => {
     el.addEventListener("change", (event) => {
       const detail = getDetail(event.target.dataset.feeling);
-      detail.needs = [...event.target.selectedOptions].map((option) => option.value);
+      const allChecked = container.querySelectorAll(`input[type='checkbox'][data-feeling="${event.target.dataset.feeling}"][data-field='needs']:checked`);
+      detail.needs = [...allChecked].map((checkbox) => checkbox.value);
+      
+      const feeling = event.target.dataset.feeling;
+      const btn = container.querySelector(`.needs-select-toggle[data-feeling="${feeling}"]`);
+      if (btn) {
+        const count = detail.needs.length;
+        btn.querySelector(".toggle-label").textContent = count ? `${count} ${count === 1 ? "need" : "needs"} selected` : t("chooseNeed");
+      }
+      
       renderStepThree();
       renderStepFour();
     });

@@ -412,6 +412,96 @@ button.btn.secondary:hover { background: rgba(238, 241, 247, 0.95); opacity: 1; 
   background: linear-gradient(90deg, rgba(62, 207, 142, 0.14), rgba(43, 179, 163, 0.12));
   color: var(--text-dark);
 }
+
+/* Checkbox-based needs selector */
+.needs-select-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.needs-select-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 46px;
+  padding: 0 16px;
+  border: 1px solid rgba(226, 229, 238, 0.9);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--text-dark);
+  font-weight: 600;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s ease, background 0.2s;
+  box-shadow: inset 0 1px 2px rgba(28, 35, 51, 0.02);
+}
+
+.needs-select-toggle:hover {
+  border-color: rgba(62, 207, 142, 0.5);
+  background: rgba(255, 255, 255, 1);
+}
+
+.needs-select-toggle.open {
+  border-color: rgba(62, 207, 142, 0.7);
+  box-shadow: 0 0 0 4px rgba(62, 207, 142, 0.08);
+}
+
+.needs-select-toggle .toggle-icon {
+  display: inline-block;
+  transition: transform 0.2s ease;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.needs-select-toggle.open .toggle-icon {
+  transform: rotate(180deg);
+}
+
+.needs-checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+  padding: 12px 8px;
+  border: 1px solid rgba(226, 229, 238, 0.9);
+  border-top: none;
+  border-radius: 0 0 14px 14px;
+  background: rgba(247, 250, 252, 0.95);
+  margin-top: -1px;
+}
+
+.needs-checkbox-grid[hidden] {
+  display: none !important;
+}
+
+.needs-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.needs-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--green);
+  flex-shrink: 0;
+}
+
+.needs-checkbox span {
+  font-size: 0.83rem;
+  color: var(--text-dark);
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.needs-checkbox:hover span {
+  color: var(--green-dark);
+}
+
+
 .summary-card {
   background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(246,249,252,0.96));
 }
