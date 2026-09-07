@@ -109,19 +109,19 @@ const DISTORTIONS = [
 ];
 
 const DISTORTION_HEBREW = {
-  "All-or-Nothing Thinking": "חשיבה של הכול או כלום",
-  Overgeneralization: "הכללת יתר",
-  "Mental Filter": "מסנן מנטלי",
-  "Discounting the Positive": "ביטול החיובי",
-  "Mind Reading": "קריאת מחשבות",
-  "Fortune Telling": "חיזוי העתיד",
-  Catastrophizing: "חשיבה קטסטרופלית",
-  Minimization: "הקטנה",
-  "Emotional Reasoning": "היגיון רגשי",
-  "Should Statements": "משפטי צריך",
-  Labeling: "תיוג",
-  Personalization: "התאמה אישית",
-  Blame: "האשמה"
+  "All-or-Nothing Thinking": ["חשיבה של הכול או כלום", "ראיית מצבים בקיצוניות, בלי להכיר באפשרויות שבאמצע."],
+  Overgeneralization: ["הכללת יתר", "הסקת מסקנה כללית מאירוע שלילי אחד, כאילו הוא מייצג דפוס קבוע."],
+  "Mental Filter": ["מסנן מנטלי", "התמקדות בפרט שלילי אחד והתעלמות מהדברים החיוביים או החשובים האחרים."],
+  "Discounting the Positive": ["ביטול החיובי", "הקטנה או דחייה של הישגים ותכונות חיוביות כאילו הם אינם נחשבים."],
+  "Mind Reading": ["קריאת מחשבות", "הנחה שאתה יודע מה אחרים חושבים או מרגישים, בלי לבדוק איתם."],
+  "Fortune Telling": ["חיזוי העתיד", "ציפייה שהדברים יסתיימו בצורה שלילית, כאילו התוצאה כבר ידועה."],
+  Catastrophizing: ["חשיבה קטסטרופלית", "העצמת הסכנה או הקושי וציפייה לתוצאה הגרועה ביותר האפשרית."],
+  Minimization: ["הקטנה", "הפחתה מחשיבותם של דברים טובים, של הצלחות או של רגשות לגיטימיים."],
+  "Emotional Reasoning": ["היגיון רגשי", "הנחה שאם אתה מרגיש משהו, הוא בהכרח משקף את המציאות."],
+  "Should Statements": ["משפטי 'צריך'", "ביקורת על עצמך או על אחרים באמצעות ציפיות נוקשות כמו 'צריך', 'חייב' או 'אסור'."],
+  Labeling: ["תיוג", "הדבקת תווית שלילית כוללת לאדם במקום לתאר התנהגות או מצב מסוים."],
+  Personalization: ["ייחוס אישי", "האשמת עצמך באירוע שלא היית אחראי לו לחלוטין או שלא היה בשליטתך."],
+  Blame: ["האשמה", "האשמת אחרים או הנסיבות תוך התעלמות מהחלק שלך ומהאפשרות להשפיע על המצב."]
 };
 
 const STORAGE_KEY = "cbtEntries";
@@ -403,8 +403,10 @@ function renderDistortions() {
     const chip = document.createElement("button");
     chip.type = "button";
     chip.className = "chip";
-    const label = lang === "he" ? DISTORTION_HEBREW[name] || name : name;
-    chip.innerHTML = `${label}<span class="d-desc">${lang === "he" ? "בחר את מלכודות החשיבה שאתה מזהה." : desc}</span>`;
+    const hebrew = DISTORTION_HEBREW[name];
+    const label = lang === "he" ? hebrew?.[0] || name : name;
+    const description = lang === "he" ? hebrew?.[1] || desc : desc;
+    chip.innerHTML = `${label}<span class="d-desc">${description}</span>`;
     chip.addEventListener("click", () => {
       if (state.distortions.has(name)) {
         state.distortions.delete(name);
