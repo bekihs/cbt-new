@@ -179,7 +179,9 @@ const FEELINGS = [
 ];
 
 const FEELING_HEBREW = {
-  Angry: "כועס", Anxious: "חרד", Ashamed: "מתבייש", Betrayed: "נבגד",
+  Happy: "שמח", Sad: "עצוב", Disgusted: "נגעל", Angry: "כועס", Fearful: "מפחד",
+  Stressed: "לחוץ", Surprised: "מופתע",
+  Anxious: "חרד", Ashamed: "מתבייש", Betrayed: "נבגד",
   Bored: "משועמם", Confused: "מבולבל", Content: "שבע רצון", Depressed: "מדוכא",
   Disappointed: "מאוכזב", Embarrassed: "נבוך", Excited: "נרגש", Frustrated: "מתוסכל",
   Guilty: "אשם", Happy: "שמח", Hopeful: "מלא תקווה", Hurt: "פגוע", Insecure: "חסר ביטחון",

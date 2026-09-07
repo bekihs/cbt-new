@@ -76,9 +76,21 @@ const EMOTION_CATEGORIES = [
 const EMOTION_MAP = new Map(EMOTION_CATEGORIES.flatMap((c) => c.items));
 
 const COLOR_PALETTE = ["#3ecf8e", "#4fa8e0", "#ef6fa0", "#f2b134", "#9b7fe0", "#3fc1d6", "#ef7d5b", "#e05656"];
+const BASIC_EMOTION_HEBREW = {
+  Happy: "שמח",
+  Sad: "עצוב",
+  Disgusted: "נגעל",
+  Angry: "כועס",
+  Fearful: "מפחד",
+  Stressed: "לחוץ",
+  Surprised: "מופתע"
+};
 
 function buildMixedEmotions() {
-  const cols = EMOTION_CATEGORIES.map((c) => c.items.slice());
+  const cols = EMOTION_CATEGORIES.map((c) => [
+    [c.name, BASIC_EMOTION_HEBREW[c.name]],
+    ...c.items.filter(([emotion]) => emotion !== c.name),
+  ]);
   const mixed = [];
   let i = 0;
   while (cols.some((c) => c.length)) {
