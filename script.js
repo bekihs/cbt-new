@@ -108,6 +108,22 @@ const DISTORTIONS = [
   ["Blame", "Blaming other people or circumstances, overlooking your own part."],
 ];
 
+const DISTORTION_HEBREW = {
+  "All-or-Nothing Thinking": "חשיבה של הכול או כלום",
+  Overgeneralization: "הכללת יתר",
+  "Mental Filter": "מסנן מנטלי",
+  "Discounting the Positive": "ביטול החיובי",
+  "Mind Reading": "קריאת מחשבות",
+  "Fortune Telling": "חיזוי העתיד",
+  Catastrophizing: "חשיבה קטסטרופלית",
+  Minimization: "הקטנה",
+  "Emotional Reasoning": "היגיון רגשי",
+  "Should Statements": "משפטי צריך",
+  Labeling: "תיוג",
+  Personalization: "התאמה אישית",
+  Blame: "האשמה"
+};
+
 const STORAGE_KEY = "cbtEntries";
 const LANG_KEY = "cbtLanguage";
 const FEELINGS_DRAFT_KEY = "cbtFeelingsDraft";
@@ -168,6 +184,7 @@ const TEXT = {
     next: "Next",
     historyLink: "View past entries →",
     needsLink: "Feelings & needs flow →",
+    needsTitle: "Feelings & Needs",
     followUp: "❤ Follow Up",
     seeResults: "See Results",
     feelingsElaborate: "Feelings elaborate",
@@ -246,6 +263,7 @@ const TEXT = {
     next: "הבא",
     historyLink: "צפה ברשומות קודמות ←",
     needsLink: "זרימת רגשות וצרכים ←",
+    needsTitle: "רגשות וצרכים",
     followUp: "❤ מעקב",
     seeResults: "הצג תוצאות",
     feelingsElaborate: "פיתוח רגשות",
@@ -322,11 +340,12 @@ function renderEmotionGrid(containerId, group) {
   container.innerHTML = "";
   const grid = document.createElement("div");
   grid.className = "emotion-grid";
+  const lang = localStorage.getItem(LANG_KEY) || "en";
 
   MIXED_EMOTIONS.forEach(({ en, he, color }) => {
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.textContent = `${en} (${he})`;
+    btn.textContent = lang === "he" ? he : en;
     btn.style.setProperty("--c", color);
     if (state.intensities[group].has(en)) btn.classList.add("selected");
     btn.addEventListener("pointerdown", (event) => {
@@ -357,11 +376,12 @@ function renderIntensityList(group) {
   state.intensities[group].forEach((value, emotion) => {
     const he = EMOTION_MAP.get(emotion);
     const color = EMOTION_COLOR.get(emotion);
+    const label = (localStorage.getItem(LANG_KEY) || "en") === "he" ? he : emotion;
     const chip = document.createElement("div");
     chip.className = "intensity-chip";
     chip.style.background = color;
     chip.innerHTML = `
-      <span>${emotion} (${he})</span>
+      <span>${label}</span>
       <input type="range" min="0" max="100" value="${value}">
       <span class="pct">${value}%</span>
     `;
@@ -378,11 +398,13 @@ function renderIntensityList(group) {
 function renderDistortions() {
   const container = document.getElementById("distortion-list");
   container.innerHTML = "";
+  const lang = localStorage.getItem(LANG_KEY) || "en";
   DISTORTIONS.forEach(([name, desc]) => {
     const chip = document.createElement("button");
     chip.type = "button";
     chip.className = "chip";
-    chip.innerHTML = `${name}<span class="d-desc">${desc}</span>`;
+    const label = lang === "he" ? DISTORTION_HEBREW[name] || name : name;
+    chip.innerHTML = `${label}<span class="d-desc">${lang === "he" ? "בחר את מלכודות החשיבה שאתה מזהה." : desc}</span>`;
     chip.addEventListener("click", () => {
       if (state.distortions.has(name)) {
         state.distortions.delete(name);
@@ -426,6 +448,11 @@ function applyLanguage(lang) {
 
   const selector = document.getElementById("language-select");
   if (selector) selector.value = lang;
+  renderEmotionGrid("emotions-before", "before");
+  renderEmotionGrid("emotions-after", "after");
+  renderIntensityList("before");
+  renderIntensityList("after");
+  renderDistortions();
 }
 
 function renderProgress() {

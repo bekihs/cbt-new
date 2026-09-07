@@ -27,6 +27,9 @@ const TEXT = {
     back: "Back",
     next: "Next",
     mainCbtLink: "← Back to regular flow",
+    needsTitle: "Feelings & Needs",
+    finish: "Finish",
+    selectedNeedCount: "selected",
     stepNames: ["Situation", "Feelings", "Feelings elaborate", "Thoughts", "Challenge", "Changing", "Changed"],
     needsStepNames: ["Selected feelings", "Behind the feeling", "Choose a need", "Review"],
     stepOf: "Step",
@@ -75,6 +78,9 @@ const TEXT = {
     back: "חזרה",
     next: "הבא",
     mainCbtLink: "← חזרה לזרימה הרגילה",
+    needsTitle: "רגשות וצרכים",
+    finish: "סיום",
+    selectedNeedCount: "נבחרו",
     stepNames: ["המצב", "רגשות", "פיתוח רגשות", "מחשבות", "אתגר", "שינוי", "מה השתנה"],
     needsStepNames: ["רגשות נבחרים", "מאחורי הרגש", "בחירת צורך", "סקירה"],
     stepOf: "שלב",
@@ -172,6 +178,37 @@ const FEELINGS = [
   "Stressed", "Tired", "Vulnerable", "Worried"
 ];
 
+const FEELING_HEBREW = {
+  Angry: "כועס", Anxious: "חרד", Ashamed: "מתבייש", Betrayed: "נבגד",
+  Bored: "משועמם", Confused: "מבולבל", Content: "שבע רצון", Depressed: "מדוכא",
+  Disappointed: "מאוכזב", Embarrassed: "נבוך", Excited: "נרגש", Frustrated: "מתוסכל",
+  Guilty: "אשם", Happy: "שמח", Hopeful: "מלא תקווה", Hurt: "פגוע", Insecure: "חסר ביטחון",
+  Interested: "מעוניין", Jealous: "מקנא", Lonely: "בודד", Nervous: "עצבני",
+  Overwhelmed: "המום", Powerless: "חסר אונים", Proud: "גאה", Rejected: "דחוי",
+  Sad: "עצוב", Scared: "מפוחד", Stressed: "לחוץ", Tired: "עייף", Vulnerable: "פגיע",
+  Worried: "מודאג", Curious: "סקרן", Inspired: "מלא השראה", Successful: "מצליח",
+  Respected: "מוערך", Valued: "יקר ערך", Loving: "אוהב", Thankful: "אסיר תודה",
+  Joyful: "עליז", Free: "חופשי", Playful: "שובב", Courageous: "אמיץ",
+  Creative: "יצירתי", Optimistic: "אופטימי", Interested: "מעוניין", Lonely: "בודד",
+  Isolated: "מבודד", Abandoned: "נטוש", Fragile: "שביר", Despairing: "מיואש",
+  Grieving: "שרוי באבל", Inferior: "נחות", Remorseful: "מתחרט", Empty: "ריק",
+  Disapproving: "מגנה", Judgmental: "שיפוטי", Appalled: "נחרד", Revolted: "סולד", Nauseated: "בחילה",
+  Detestable: "מתועב", Repelled: "נדחה", Hesitant: "מהסס", Horrified: "אחוז אימה",
+  Avoidant: "נמנע", Resentful: "רוחש טינה", Humiliated: "מושפל", Disrespected: "לא מכובד",
+  Ridiculed: "מבוזה", Bitter: "מריר", Indignant: "נזעם", Violated: "מופר",
+  Mad: "זועם", Furious: "רותח מזעם", Provoked: "מגורה", Hostile: "עוין",
+  Infuriated: "משתולל", Annoyed: "מוטרד", Withdrawn: "מסתגר", Numb: "קהה רגש",
+  Skeptical: "ספקן", Dismissive: "מזלזל", Helpless: "חסר ישע", Frightened: "נבהל",
+  Overwhelmed: "המום", Worried: "מודאג", Inadequate: "לא מספיק טוב", Weak: "חלש",
+  Worthless: "חסר ערך", Insignificant: "חסר משמעות", Excluded: "מוחרג", Persecuted: "נרדף",
+  Threatened: "מאוים", Nervous: "עצבני", Exposed: "חשוף", Busy: "עסוק",
+  Pressured: "תחת לחץ", Rushed: "ממהר", "Out of control": "חסר שליטה", Sleepy: "מנומנם",
+  Unfocused: "לא מרוכז", Startled: "נבהל בפתאומיות", Shocked: "בהלם", Dismayed: "נסער",
+  Perplexed: "תמה", Disillusioned: "מפוכח", Amazed: "המום לטובה", Astonished: "נדהם",
+  Awestruck: "נפעם", Eager: "להוט", Energetic: "נמרץ", Excited: "נרגש",
+  Indifferent: "אדיש", Apathetic: "חסר עניין", Stressed: "בלחץ", Tired: "עייף"
+};
+
 const totalSteps = 4;
 let currentStep = 1;
 
@@ -207,6 +244,10 @@ function t(key) {
   return (TEXT[lang] && TEXT[lang][key]) || TEXT.en[key] || key;
 }
 
+function getFeelingLabel(feeling, lang = localStorage.getItem(LANG_KEY) || "en") {
+  return lang === "he" ? FEELING_HEBREW[feeling] || feeling : feeling;
+}
+
 function applyLanguage(lang) {
   const dict = TEXT[lang] || TEXT.en;
   document.documentElement.lang = lang;
@@ -236,6 +277,8 @@ function applyLanguage(lang) {
   renderStepTwo();
   renderStepThree();
   renderStepFour();
+  renderStepTracker();
+  renderInnerStepTracker();
 }
 
 function renderProgress() {
@@ -335,7 +378,7 @@ function renderEmotionPicker() {
   state.selectedFeelings.forEach((feeling) => {
     const chip = document.createElement("div");
     chip.className = "chip selected";
-    chip.textContent = feeling;
+    chip.textContent = getFeelingLabel(feeling);
     list.appendChild(chip);
   });
 
@@ -362,11 +405,11 @@ function renderStepTwo() {
     `).join("");
     
     const selectedCount = detail.needs.length;
-    const label = selectedCount ? `${selectedCount} selected` : t("chooseNeed");
+    const label = selectedCount ? `${selectedCount} ${t("selectedNeedCount")}` : t("chooseNeed");
 
     return `
       <div class="needs-card">
-        <div class="needs-card-header">${feeling}</div>
+        <div class="needs-card-header">${escapeHtml(getFeelingLabel(feeling, lang))}</div>
         <div class="field">
           <label>${t("behindLabel")}</label>
           <div class="wrap-input"><textarea data-feeling="${feeling}" data-field="behind" placeholder="${t("writeBehindPrompt")}">${escapeHtml(detail.behind)}</textarea></div>
@@ -417,7 +460,7 @@ function renderStepTwo() {
       const btn = container.querySelector(`.needs-select-toggle[data-feeling="${feeling}"]`);
       if (btn) {
         const count = detail.needs.length;
-        btn.querySelector(".toggle-label").textContent = count ? `${count} ${count === 1 ? "need" : "needs"} selected` : t("chooseNeed");
+        btn.querySelector(".toggle-label").textContent = count ? `${count} ${t("selectedNeedCount")}` : t("chooseNeed");
       }
       
       renderStepThree();
@@ -447,10 +490,10 @@ function renderStepThree() {
 
     return `
       <div class="needs-card">
-        <div class="needs-card-header">${feeling}</div>
+        <div class="needs-card-header">${escapeHtml(getFeelingLabel(feeling, lang))}</div>
         <div class="field">
           <label>${t("emotionLabel")}</label>
-          <div class="wrap-input"><input type="text" value="${escapeHtml(feeling)}" readonly></div>
+          <div class="wrap-input"><input type="text" value="${escapeHtml(getFeelingLabel(feeling, lang))}" readonly></div>
         </div>
         <div class="field">
           <label>${t("selectNeedLabel")}</label>
@@ -500,7 +543,7 @@ function renderStepFour() {
 
     return `
       <div class="needs-card summary-card">
-        <div class="needs-card-header">${feeling}</div>
+        <div class="needs-card-header">${escapeHtml(getFeelingLabel(feeling, lang))}</div>
         <div class="summary-row"><strong>${t("feelingReviewTitle")}</strong> ${escapeHtml(detail.behind || t("notFilled"))}</div>
         <div class="summary-row"><strong>${t("needsReviewTitle")}</strong> ${escapeHtml(needList)}</div>
         <div class="summary-row"><strong>${t("selectedNeedTitle")}</strong> ${escapeHtml(needLabel)}</div>
@@ -527,7 +570,7 @@ function showStep(step) {
   }
 
   if (nextBtn) {
-    nextBtn.textContent = step === totalSteps ? "Finish" : t("next");
+    nextBtn.textContent = step === totalSteps ? t("finish") : t("next");
     nextBtn.disabled = false;
   }
 

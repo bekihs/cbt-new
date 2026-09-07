@@ -6,13 +6,69 @@ const TEXT = {
     historyTitle: "Past Entries",
     historySubtitle: "Everything you've saved on this device.",
     newEntryLink: "← New entry",
-    deleteLabel: "Delete"
+    deleteLabel: "Delete",
+    noneSelected: "None selected.",
+    noFeelingsRecorded: "No feelings recorded.",
+    situation: "Situation",
+    feeling: "How You Felt",
+    behindFeeling: "What sits behind this feeling:",
+    needBehindFeeling: "Need behind this feeling:",
+    selectedNeed: "Selected need:",
+    whatGivesNeed: "What will give you this need:",
+    noNeedSelected: "No need selected",
+    notFilled: "Not filled in",
+    untitled: "Untitled entry",
+    followUpScheduled: " · follow-up scheduled",
+    physicalSensations: "Physical Sensations",
+    unhelpfulThought: "Unhelpful Thought",
+    firstThought: "(Your first thought)",
+    interpretation: "Interpretation",
+    pastExperiences: "Past Experiences",
+    underlyingBeliefs: "Underlying Beliefs",
+    consequence: "Consequence / Behavior",
+    evidenceFor: "Evidence That Supports the Thought",
+    evidenceAgainst: "Evidence Against the Thought",
+    distortions: "Cognitive Distortions",
+    noDistortions: "No thinking traps selected.",
+    balancedThought: "Balanced Alternative Thought",
+    newEmotionBehavior: "New Emotion & Behavior",
+    nextAction: "What You'll Do Differently",
+    changed: "How You Feel Now",
+    needs: "Needs"
   },
   he: {
     historyTitle: "רשומות קודמות",
     historySubtitle: "הכל שאתה שומר במכשיר הזה.",
     newEntryLink: "← רשומה חדשה",
-    deleteLabel: "מחק"
+    deleteLabel: "מחק",
+    noneSelected: "לא נבחרו.",
+    noFeelingsRecorded: "לא נרשמו רגשות.",
+    situation: "המצב",
+    feeling: "איך הרגשת",
+    behindFeeling: "מה עומד מאחורי הרגש הזה:",
+    needBehindFeeling: "הצורך שמאחורי הרגש:",
+    selectedNeed: "הצורך שנבחר:",
+    whatGivesNeed: "מה ייתן לך את הצורך הזה:",
+    noNeedSelected: "לא נבחר צורך",
+    notFilled: "לא מולא",
+    untitled: "רשומה ללא כותרת",
+    followUpScheduled: " · נקבע מעקב",
+    physicalSensations: "תחושות גופניות",
+    unhelpfulThought: "מחשבה לא מועילה",
+    firstThought: "(המחשבה הראשונה)",
+    interpretation: "פירוש",
+    pastExperiences: "חוויות מהעבר",
+    underlyingBeliefs: "אמונות בסיסיות",
+    consequence: "תוצאה / התנהגות",
+    evidenceFor: "ראיות התומכות במחשבה",
+    evidenceAgainst: "ראיות נגד המחשבה",
+    distortions: "עיוותי חשיבה",
+    noDistortions: "לא נבחרו מלכודות חשיבה.",
+    balancedThought: "מחשבה חלופית מאוזנת",
+    newEmotionBehavior: "רגש והתנהגות חדשים",
+    nextAction: "מה תעשה אחרת",
+    changed: "איך אתה מרגיש עכשיו",
+    needs: "צרכים"
   }
 };
 
@@ -24,6 +80,8 @@ function t(key) {
 function applyLanguage(lang) {
   const dict = TEXT[lang] || TEXT.en;
   document.documentElement.lang = lang;
+  document.documentElement.dir = lang === "he" ? "rtl" : "ltr";
+  document.body.classList.toggle("rtl", lang === "he");
   localStorage.setItem(LANG_KEY, lang);
 
   document.querySelectorAll("[data-i18n]").forEach((el) => {
@@ -49,7 +107,7 @@ function levelBarHtml(value) {
 }
 
 function emotionChipsHtml(list) {
-  if (!list?.length) return `<span class="r-empty">None selected.</span>`;
+  if (!list?.length) return `<span class="r-empty">${t("noneSelected")}</span>`;
   return list
     .map((e) => `<span class="review-chip" style="background:${e.color || "#8b91a5"};border-color:${e.color || "#8b91a5"};color:#fff">${escapeHtml(e.emotion)} ${e.intensity}%</span>`)
     .join("");
@@ -69,24 +127,24 @@ function textCardHtml(title, text) {
 
 function needsSummaryHtml(entry) {
   if (!entry.feelings?.length) {
-    return `<span class="r-empty">No feelings recorded.</span>`;
+    return `<span class="r-empty">${t("noFeelingsRecorded")}</span>`;
   }
 
   return entry.feelings.map(({ feeling, behind, needs, selectedNeed, whatWillGive }) => {
     const labels = needs?.length
       ? needs.map((need) => NEEDS.find((item) => item.value === need)?.label || need).join(", ")
-      : "No need selected";
-    const selectedLabel = NEEDS.find((item) => item.value === selectedNeed)?.label || "No need selected";
+      : t("noNeedSelected");
+    const selectedLabel = NEEDS.find((item) => item.value === selectedNeed)?.label || t("noNeedSelected");
 
     return `
       <div class="timeline-item">
         <div class="timeline-node"></div>
         <div class="review-card">
           <div class="r-title">${escapeHtml(feeling)}</div>
-          <div class="summary-row"><strong>What sits behind this feeling:</strong> ${escapeHtml(behind || "Not filled in")}</div>
-          <div class="summary-row"><strong>Need behind this feeling:</strong> ${escapeHtml(labels)}</div>
-          <div class="summary-row"><strong>Selected need:</strong> ${escapeHtml(selectedLabel)}</div>
-          <div class="summary-row"><strong>What will give you this need:</strong> ${escapeHtml(whatWillGive || "Not filled in")}</div>
+          <div class="summary-row"><strong>${t("behindFeeling")}</strong> ${escapeHtml(behind || t("notFilled"))}</div>
+          <div class="summary-row"><strong>${t("needBehindFeeling")}</strong> ${escapeHtml(labels)}</div>
+          <div class="summary-row"><strong>${t("selectedNeed")}</strong> ${escapeHtml(selectedLabel)}</div>
+          <div class="summary-row"><strong>${t("whatGivesNeed")}</strong> ${escapeHtml(whatWillGive || t("notFilled"))}</div>
         </div>
       </div>
     `;
@@ -97,17 +155,17 @@ function renderEntry(entry) {
   const wrap = document.createElement("div");
   wrap.className = "entry-card";
 
-  const heading = escapeHtml(entry.title || "Untitled entry");
+  const heading = escapeHtml(entry.title || t("untitled"));
   const dateStr = escapeHtml(entry.date || "");
-  const followUpNote = entry.followedUp ? " &middot; follow-up scheduled" : "";
+  const followUpNote = entry.followedUp ? escapeHtml(t("followUpScheduled")) : "";
 
   const distortionsHtml = entry.distortions?.length
     ? entry.distortions.map((d) => `<span class="review-chip">${escapeHtml(d)}</span>`).join("")
-    : `<span class="r-empty">No thinking traps selected.</span>`;
+    : `<span class="r-empty">${t("noDistortions")}</span>`;
 
   const timelineHtml = entry.type === "needs"
     ? [
-        textCardHtml("Situation", entry.situation),
+        textCardHtml(t("situation"), entry.situation),
         needsSummaryHtml(entry),
       ].join("")
     : [
@@ -115,40 +173,40 @@ function renderEntry(entry) {
         `<div class="timeline-item">
           <div class="timeline-node"></div>
           <div class="review-card">
-            <div class="r-title">How You Felt</div>
+            <div class="r-title">${t("feeling")}</div>
             ${emotionChipsHtml(entry.initialEmotions)}
           </div>
         </div>`,
-        textCardHtml("Physical Sensations", entry.physicalSensations),
+        textCardHtml(t("physicalSensations"), entry.physicalSensations),
         `<div class="timeline-item">
           <div class="timeline-node"></div>
           <div class="review-card">
-            <div class="r-title">Unhelpful Thought <span class="r-sub">(Your first thought)</span></div>
+            <div class="r-title">${t("unhelpfulThought")} <span class="r-sub">${t("firstThought")}</span></div>
             <div class="r-text">${escapeHtml(entry.automaticThought) || "(no thought recorded)"}</div>
             <div class="level-row"><span class="level-value">Level: <b>${entry.level ?? 0}</b>/100</span></div>
             ${levelBarHtml(entry.level ?? 0)}
           </div>
         </div>`,
-        textCardHtml("Interpretation", entry.interpretation),
-        textCardHtml("Past Experiences", entry.pastExperiences),
-        textCardHtml("Underlying Beliefs", entry.beliefs),
-        textCardHtml("Consequence / Behavior", entry.consequence),
-        textCardHtml("Evidence That Supports the Thought", entry.evidenceFor),
-        textCardHtml("Evidence Against the Thought", entry.evidenceAgainst),
+        textCardHtml(t("interpretation"), entry.interpretation),
+        textCardHtml(t("pastExperiences"), entry.pastExperiences),
+        textCardHtml(t("underlyingBeliefs"), entry.beliefs),
+        textCardHtml(t("consequence"), entry.consequence),
+        textCardHtml(t("evidenceFor"), entry.evidenceFor),
+        textCardHtml(t("evidenceAgainst"), entry.evidenceAgainst),
         `<div class="timeline-item">
           <div class="timeline-node"></div>
           <div class="review-card">
-            <div class="r-title">Cognitive Distortions</div>
+            <div class="r-title">${t("distortions")}</div>
             ${distortionsHtml}
           </div>
         </div>`,
-        textCardHtml("Balanced Alternative Thought", entry.balancedThought),
-        textCardHtml("New Emotion &amp; Behavior", entry.newEmotionBehavior),
-        textCardHtml("What You'll Do Differently", entry.nextAction),
+        textCardHtml(t("balancedThought"), entry.balancedThought),
+        textCardHtml(t("newEmotionBehavior"), entry.newEmotionBehavior),
+        textCardHtml(t("nextAction"), entry.nextAction),
         `<div class="timeline-item">
           <div class="timeline-node"></div>
           <div class="review-card">
-            <div class="r-title">How You Feel Now</div>
+            <div class="r-title">${t("changed")}</div>
             ${emotionChipsHtml(entry.finalEmotions)}
           </div>
         </div>`,
