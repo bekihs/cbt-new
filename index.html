@@ -11,7 +11,7 @@
 <div class="wrap-card">
 
   <header class="app-header">
-    <a href="index.html" class="header-badge" aria-label="Home">&#8962;</a>
+    <a href="index.html" class="header-badge" id="home-link" aria-label="Home">&#8962;</a>
     <div class="header-copy">
       <h1>CBT Companion</h1>
       <p data-i18n="appSubtitle">Work through a difficult thought, step by step.</p>
@@ -26,6 +26,7 @@
 
   <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
   <div class="progress-label" id="progress-label"></div>
+  <nav class="step-tracker" id="step-tracker" aria-label="CBT steps"></nav>
 
   <form id="cbt-form">
 
@@ -59,8 +60,8 @@
       <div class="intensity-list" id="intensity-before"></div>
     </section>
 
-    <!-- Step 3: Automatic thoughts -->
-    <section class="step" data-step="3" hidden>
+    <!-- Step 4: Thoughts -->
+    <section class="step" data-step="4" hidden>
       <span class="step-title" data-i18n="step3Title">Automatic Thoughts</span>
       <p class="step-subtitle" data-i18n="step3Subtitle">Look closer at what went through your mind.</p>
 
@@ -111,8 +112,8 @@
       </div>
     </section>
 
-    <!-- Step 4: Identify distortions & evidence -->
-    <section class="step" data-step="4" hidden>
+    <!-- Step 5: Challenge -->
+    <section class="step" data-step="5" hidden>
       <span class="step-title" data-i18n="step4Title">Identify &amp; Challenge</span>
       <p class="step-subtitle" data-i18n="step4Subtitle">Question the evidence, and spot any thinking traps.</p>
 
@@ -133,8 +134,8 @@
       </div>
     </section>
 
-    <!-- Step 5: Reframe -->
-    <section class="step" data-step="5" hidden>
+    <!-- Step 6: Changing -->
+    <section class="step" data-step="6" hidden>
       <span class="step-title" data-i18n="step5Title">Better Coping</span>
       <p class="step-subtitle" data-i18n="step5Subtitle">Create a balanced, realistic alternative thought.</p>
 
@@ -155,16 +156,16 @@
       </div>
     </section>
 
-    <!-- Step 6: Feelings after -->
-    <section class="step" data-step="6" hidden>
+    <!-- Step 7: Changed -->
+    <section class="step" data-step="7" hidden>
       <span class="step-title" data-i18n="step6Title">How You Feel Now</span>
       <p class="step-subtitle" data-i18n="step6Subtitle">Re-select your emotions and re-rate their intensity.</p>
       <div class="emotion-picker" id="emotions-after"></div>
       <div class="intensity-list" id="intensity-after"></div>
     </section>
 
-    <!-- Step 7: Review -->
-    <section class="step" data-step="7" hidden>
+    <!-- Review after step 7 -->
+    <section class="step" data-step="8" hidden>
       <div class="confirmation">
         <h2 data-i18n="exerciseReview">Exercise Review</h2>
         <p data-i18n="savedOnDevice">Saved on this device.</p>

@@ -10,7 +10,7 @@
   <div class="wrap">
     <div class="wrap-card">
       <header class="app-header">
-        <a href="index.html" class="header-badge" aria-label="Home">&#8962;</a>
+        <a href="index.html" class="header-badge" id="home-link" aria-label="Home">&#8962;</a>
         <div class="header-copy">
           <h1>Feelings &amp; Needs</h1>
           <p data-i18n="needsAppSubtitle">Trace what is underneath the feeling and what may help.</p>
@@ -25,6 +25,8 @@
 
       <div class="progress-track"><div class="progress-fill" id="needs-progress-fill"></div></div>
       <div class="progress-label" id="needs-progress-label"></div>
+      <nav class="step-tracker" id="needs-step-tracker" aria-label="Feelings and needs steps"></nav>
+      <nav class="inner-step-tracker" id="inner-step-tracker" aria-label="Feelings elaboration steps"></nav>
 
       <form id="needs-form">
         <section class="needs-step" data-step="1">
@@ -64,7 +66,7 @@
     </div>
 
     <div class="footer-link">
-      <a href="index.html#step3" data-i18n="mainCbtLink">&larr; Back to regular flow</a>
+      <a href="index.html#step2" data-i18n="mainCbtLink">&larr; Back to regular flow</a>
     </div>
   </div>
 

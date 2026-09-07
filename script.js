@@ -111,7 +111,9 @@ const DISTORTIONS = [
 const STORAGE_KEY = "cbtEntries";
 const LANG_KEY = "cbtLanguage";
 const FEELINGS_DRAFT_KEY = "cbtFeelingsDraft";
-const totalSteps = 6;
+const CBT_DRAFT_KEY = "cbtDraft";
+const APP_DATA_KEYS = [STORAGE_KEY, LANG_KEY, FEELINGS_DRAFT_KEY, CBT_DRAFT_KEY, "cbtNeedsDraft", "cbtNeedsReturnToStep"];
+const totalSteps = 7;
 let currentStep = 1;
 let followedUp = false;
 
@@ -129,7 +131,7 @@ const TEXT = {
     situationPlaceholder: "Describe the situation",
     step2Title: "How You Felt",
     step2Subtitle: "Select every emotion that applies, then set its intensity.",
-    step3Title: "Automatic Thoughts",
+    step3Title: "Thoughts",
     step3Subtitle: "Look closer at what went through your mind.",
     physicalSensations: "Physical sensations",
     physicalSensationsHint: "What did you notice in your body?",
@@ -144,21 +146,21 @@ const TEXT = {
     beliefs: "Underlying beliefs",
     consequence: "Consequence / behavior",
     consequenceHint: "What did you do (or want to do) as a result?",
-    step4Title: "Identify & Challenge",
+    step4Title: "Challenge",
     step4Subtitle: "Question the evidence, and spot any thinking traps.",
     evidenceFor: "Evidence that supports the thought",
     evidenceAgainst: "Evidence against the thought",
     cognitiveDistortions: "Cognitive distortions",
     distortionsHint: "Select any thinking traps you notice in this thought.",
-    step5Title: "Better Coping",
+    step5Title: "Changing",
     step5Subtitle: "Create a balanced, realistic alternative thought.",
     balancedThought: "Balanced alternative thought",
     balancedThoughtPlaceholder: "e.g. I'm still learning and improving. One mistake doesn't define my abilities",
     newEmotionBehavior: "New emotion & behavior",
     newEmotionBehaviorHint: "Holding the balanced thought, how do you feel and act now?",
     nextAction: "What will you do differently?",
-    step6Title: "How You Feel Now",
-    step6Subtitle: "Re-select your emotions and re-rate their intensity.",
+    step6Title: "Changed",
+    step6Subtitle: "Notice how you feel and respond after the change.",
     exerciseReview: "Exercise Review",
     savedOnDevice: "Saved on this device.",
     thoughtRecord: "Thought Record",
@@ -169,6 +171,7 @@ const TEXT = {
     followUp: "❤ Follow Up",
     seeResults: "See Results",
     feelingsElaborate: "Feelings elaborate",
+    stepNames: ["Situation", "Feelings", "Feelings elaborate", "Thoughts", "Challenge", "Changing", "Changed"],
     stepOf: "Step",
     of: "of",
     pastEntries: "Past Entries",
@@ -206,7 +209,7 @@ const TEXT = {
     situationPlaceholder: "תאר את המצב",
     step2Title: "איך הרגשת?",
     step2Subtitle: "בחר את כל הרגשות הרלוונטיים ואז קבע את עוצמתם.",
-    step3Title: "מחשבות אוטומטיות",
+    step3Title: "מחשבות",
     step3Subtitle: "הסתכלו מקרוב על מה שעבר לכם בראש.",
     physicalSensations: "תחושות גופניות",
     physicalSensationsHint: "מה שמתם לב אליו בגוף?",
@@ -221,21 +224,21 @@ const TEXT = {
     beliefs: "אמונות בסיסיות",
     consequence: "תוצאה / התנהגות",
     consequenceHint: "מה עשית (או רצית לעשות) כתוצאה מכך?",
-    step4Title: "זיהוי והערכה",
+    step4Title: "אתגר",
     step4Subtitle: "שאל את עצמך שאלות לגבי הראיות וחשוף מלכודות חשיבה.",
     evidenceFor: "ראיות התומכות במחשבה",
     evidenceAgainst: "ראיות נגד המחשבה",
     cognitiveDistortions: "עיוותי חשיבה",
     distortionsHint: "בחר את מלכודות החשיבה שאתה מזהה במחשבה הזו.",
-    step5Title: "התמודדות טובה יותר",
+    step5Title: "שינוי",
     step5Subtitle: "צור מחשבה מאוזנת ומציאותית יותר.",
     balancedThought: "מחשבה חלופית מאוזנת",
     balancedThoughtPlaceholder: "למשל: אני עדיין לומד ומשתפר. טעות אחת לא מגדירה את היכולות שלי",
     newEmotionBehavior: "רגש והתנהגות חדשים",
     newEmotionBehaviorHint: "כשיש לך את המחשבה המאוזנת, איך אתה מרגיש ומה אתה עושה עכשיו?",
     nextAction: "מה תעשה אחרת?",
-    step6Title: "איך אתה מרגיש עכשיו?",
-    step6Subtitle: "בחר שוב את הרגשות שלך וחזור על דירוג עוצמתם.",
+    step6Title: "מה השתנה",
+    step6Subtitle: "שים לב איך אתה מרגיש ופועל אחרי השינוי.",
     exerciseReview: "סקירת התרגיל",
     savedOnDevice: "נשמר במכשיר זה.",
     thoughtRecord: "רשומת מחשבה",
@@ -246,6 +249,7 @@ const TEXT = {
     followUp: "❤ מעקב",
     seeResults: "הצג תוצאות",
     feelingsElaborate: "פיתוח רגשות",
+    stepNames: ["המצב", "רגשות", "פיתוח רגשות", "מחשבות", "אתגר", "שינוי", "מה השתנה"],
     stepOf: "שלב",
     of: "מתוך",
     pastEntries: "רשומות קודמות",
@@ -303,6 +307,7 @@ function initLevelSlider() {
   const input = document.getElementById("level");
   const fill = document.getElementById("level-fill");
   const value = document.getElementById("level-value");
+  input.value = state.level;
   const update = () => {
     state.level = Number(input.value);
     fill.style.width = `${state.level}%`;
@@ -323,6 +328,7 @@ function renderEmotionGrid(containerId, group) {
     btn.type = "button";
     btn.textContent = `${en} (${he})`;
     btn.style.setProperty("--c", color);
+    if (state.intensities[group].has(en)) btn.classList.add("selected");
     btn.addEventListener("pointerdown", (event) => {
       event.preventDefault();
     });
@@ -336,6 +342,7 @@ function renderEmotionGrid(containerId, group) {
         btn.classList.add("selected");
       }
       renderIntensityList(group);
+      saveDraft();
     });
     grid.appendChild(btn);
   });
@@ -428,6 +435,37 @@ function renderProgress() {
   label.textContent = `${t("stepOf")} ${currentStep} ${t("of")} ${totalSteps}`;
 }
 
+function renderStepTracker() {
+  const tracker = document.getElementById("step-tracker");
+  if (!tracker) return;
+  const names = TEXT[localStorage.getItem(LANG_KEY) || "en"].stepNames || [];
+  tracker.innerHTML = names.map((name, index) => {
+    const step = index + 1;
+    return `<button type="button" class="step-track-item${step === currentStep ? " active" : ""}" data-step="${step}">
+      <span class="step-track-number">${step}</span><span class="step-track-name">${name}</span>
+    </button>`;
+  }).join("");
+  tracker.querySelectorAll("button").forEach((button) => {
+    button.addEventListener("click", () => {
+      saveDraft();
+      const step = Number(button.dataset.step);
+      if (step === 3) {
+        openFeelingsFlow();
+        return;
+      }
+      currentStep = step;
+      showStep(currentStep);
+    });
+  });
+}
+
+function openFeelingsFlow() {
+  const feelings = [...state.intensities.before.keys()];
+  localStorage.setItem(FEELINGS_DRAFT_KEY, JSON.stringify(feelings));
+  localStorage.setItem("cbtNeedsReturnToStep", "4");
+  window.location.href = "needs.html";
+}
+
 function emotionChipsHtml(list) {
   if (!list.length) return `<span class="r-empty">None selected.</span>`;
   return list
@@ -500,6 +538,10 @@ function renderReview(entry) {
 }
 
 function showStep(step) {
+  if (step === 3) {
+    openFeelingsFlow();
+    return;
+  }
   document.querySelectorAll(".step").forEach((el) => {
     el.hidden = Number(el.dataset.step) !== step;
   });
@@ -527,6 +569,7 @@ function showStep(step) {
     }
     renderProgress();
   }
+  renderStepTracker();
 
   const stepHash = `#step${step}`;
   if (window.location.hash !== stepHash && step <= totalSteps) {
@@ -577,6 +620,29 @@ function saveEntry(entry) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
 }
 
+function saveDraft() {
+  localStorage.setItem(CBT_DRAFT_KEY, JSON.stringify(collectEntry()));
+}
+
+function resetAppFromHome(event) {
+  event.preventDefault();
+  APP_DATA_KEYS.forEach((key) => localStorage.removeItem(key));
+  window.location.href = "index.html#step1";
+}
+
+function restoreDraft() {
+  const draft = JSON.parse(localStorage.getItem(CBT_DRAFT_KEY) || "null");
+  if (!draft) return;
+  ["title", "date", "situation", "physicalSensations", "automaticThought", "interpretation", "pastExperiences", "beliefs", "consequence", "evidenceFor", "evidenceAgainst", "balancedThought", "newEmotionBehavior", "nextAction"].forEach((id) => {
+    const input = document.getElementById(id);
+    if (input && draft[id] !== undefined) input.value = draft[id];
+  });
+  state.level = Number(draft.level ?? 50);
+  state.intensities.before = new Map((draft.initialEmotions || []).map((item) => [item.emotion, item.intensity]));
+  state.intensities.after = new Map((draft.finalEmotions || []).map((item) => [item.emotion, item.intensity]));
+  state.distortions = new Set(draft.distortions || []);
+}
+
 function markLastEntryFollowedUp() {
   const entries = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
   if (!entries.length) return;
@@ -588,6 +654,7 @@ document.getElementById("btn-next").addEventListener("click", () => {
   if (currentStep === totalSteps) {
     const entry = collectEntry();
     saveEntry(entry);
+    localStorage.removeItem(CBT_DRAFT_KEY);
     renderReview(entry);
     currentStep = totalSteps + 1;
     showStep(currentStep);
@@ -604,22 +671,32 @@ document.getElementById("btn-next").addEventListener("click", () => {
     return;
   }
 
+  if (currentStep === 2) {
+    saveDraft();
+    openFeelingsFlow();
+    return;
+  }
+
+  saveDraft();
   currentStep++;
   showStep(currentStep);
 });
 
 document.getElementById("btn-feelings-elaborate").addEventListener("click", () => {
-  const feelings = [...state.intensities.before.keys()];
-  localStorage.setItem(FEELINGS_DRAFT_KEY, JSON.stringify(feelings));
-  localStorage.setItem("cbtNeedsReturnToStep", "3");
-  window.location.href = "needs.html";
+  saveDraft();
+  openFeelingsFlow();
 });
 
 document.getElementById("btn-prev").addEventListener("click", () => {
   if (currentStep <= 1) return;
+  saveDraft();
   currentStep--;
   showStep(currentStep);
 });
+
+document.getElementById("cbt-form").addEventListener("input", saveDraft);
+document.getElementById("cbt-form").addEventListener("change", saveDraft);
+document.getElementById("home-link").addEventListener("click", resetAppFromHome);
 
 window.addEventListener("hashchange", () => {
   const match = /^#step(\d+)$/i.exec(window.location.hash || "");
@@ -639,11 +716,14 @@ if (languageSelect) {
 
 const savedLang = localStorage.getItem(LANG_KEY) || "en";
 applyLanguage(savedLang);
-document.getElementById("date").valueAsDate = new Date();
+restoreDraft();
+if (!document.getElementById("date").value) document.getElementById("date").valueAsDate = new Date();
 initLevelSlider();
 renderEmotionGrid("emotions-before", "before");
 renderEmotionGrid("emotions-after", "after");
 renderDistortions();
+renderIntensityList("before");
+renderIntensityList("after");
 const hashMatch = /^#step(\d+)$/i.exec(window.location.hash || "");
 if (hashMatch) {
   const hashStep = Number(hashMatch[1]);

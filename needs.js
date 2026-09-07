@@ -1,6 +1,8 @@
 const STORAGE_KEY = "cbtEntries";
 const LANG_KEY = "cbtLanguage";
 const FEELINGS_DRAFT_KEY = "cbtFeelingsDraft";
+const NEEDS_DRAFT_KEY = "cbtNeedsDraft";
+const APP_DATA_KEYS = [STORAGE_KEY, LANG_KEY, FEELINGS_DRAFT_KEY, NEEDS_DRAFT_KEY, "cbtDraft", "cbtNeedsReturnToStep"];
 
 const TEXT = {
   en: {
@@ -25,6 +27,8 @@ const TEXT = {
     back: "Back",
     next: "Next",
     mainCbtLink: "← Back to regular flow",
+    stepNames: ["Situation", "Feelings", "Feelings elaborate", "Thoughts", "Challenge", "Changing", "Changed"],
+    needsStepNames: ["Selected feelings", "Behind the feeling", "Choose a need", "Review"],
     stepOf: "Step",
     of: "of",
     saveMessage: "Please choose at least one feeling to continue.",
@@ -71,6 +75,8 @@ const TEXT = {
     back: "חזרה",
     next: "הבא",
     mainCbtLink: "← חזרה לזרימה הרגילה",
+    stepNames: ["המצב", "רגשות", "פיתוח רגשות", "מחשבות", "אתגר", "שינוי", "מה השתנה"],
+    needsStepNames: ["רגשות נבחרים", "מאחורי הרגש", "בחירת צורך", "סקירה"],
     stepOf: "שלב",
     of: "מתוך",
     saveMessage: "בחר לפחות רגש אחד כדי להמשיך.",
@@ -237,6 +243,80 @@ function renderProgress() {
   const label = document.getElementById("needs-progress-label");
   fill.style.width = `${(currentStep / totalSteps) * 100}%`;
   label.textContent = `${t("stepOf")} ${currentStep} ${t("of")} ${totalSteps}`;
+}
+
+function renderStepTracker() {
+  const tracker = document.getElementById("needs-step-tracker");
+  if (!tracker) return;
+  const names = TEXT[localStorage.getItem(LANG_KEY) || "en"].stepNames || [];
+  tracker.innerHTML = names.map((name, index) => {
+    const step = index + 1;
+    return `<button type="button" class="step-track-item${step === 3 ? " active" : ""}" data-step="${step}">
+      <span class="step-track-number">${step}</span><span class="step-track-name">${name}</span>
+    </button>`;
+  }).join("");
+  tracker.querySelectorAll("button").forEach((button) => {
+    button.addEventListener("click", () => {
+      saveNeedsDraft();
+      const step = Number(button.dataset.step);
+      if (step === 3) {
+        currentStep = 1;
+        showStep(currentStep);
+        return;
+      }
+      window.location.href = `index.html#step${step}`;
+    });
+  });
+}
+
+function renderInnerStepTracker() {
+  const tracker = document.getElementById("inner-step-tracker");
+  if (!tracker) return;
+  const names = (TEXT[localStorage.getItem(LANG_KEY) || "en"].needsStepNames || []);
+  tracker.innerHTML = names.map((name, index) => {
+    const step = index + 1;
+    return `<button type="button" class="inner-step-item${step === currentStep ? " active" : ""}" data-step="${step}">
+      <span class="inner-step-number">${step}</span><span>${name}</span>
+    </button>`;
+  }).join("");
+  tracker.querySelectorAll("button").forEach((button) => {
+    button.addEventListener("click", () => {
+      saveNeedsDraft();
+      currentStep = Number(button.dataset.step);
+      if (currentStep === 2) renderStepTwo();
+      if (currentStep === 3) renderStepThree();
+      if (currentStep === 4) renderStepFour();
+      showStep(currentStep);
+    });
+  });
+}
+
+function saveNeedsDraft() {
+  localStorage.setItem(NEEDS_DRAFT_KEY, JSON.stringify({
+    selectedFeelings: state.selectedFeelings,
+    details: [...state.details.entries()],
+    title: document.getElementById("needs-title")?.value || "",
+    date: document.getElementById("needs-date")?.value || "",
+    situation: document.getElementById("needs-situation")?.value || "",
+  }));
+}
+
+function resetAppFromHome(event) {
+  event.preventDefault();
+  APP_DATA_KEYS.forEach((key) => localStorage.removeItem(key));
+  window.location.href = "index.html#step1";
+}
+
+function restoreNeedsDraft() {
+  const draft = JSON.parse(localStorage.getItem(NEEDS_DRAFT_KEY) || "null");
+  if (!draft) return;
+  if (Array.isArray(draft.selectedFeelings) && draft.selectedFeelings.length) state.selectedFeelings = draft.selectedFeelings;
+  if (Array.isArray(draft.details)) state.details = new Map(draft.details);
+  ["needs-title", "needs-date", "needs-situation"].forEach((id) => {
+    const input = document.getElementById(id);
+    const key = id.replace("needs-", "");
+    if (input && draft[key]) input.value = draft[key];
+  });
 }
 
 function renderEmotionPicker() {
@@ -452,6 +532,8 @@ function showStep(step) {
   }
 
   renderProgress();
+  renderStepTracker();
+  renderInnerStepTracker();
 }
 
 function collectNeedsEntry() {
@@ -486,6 +568,7 @@ function saveNeedsEntry() {
 }
 
 function handleNext() {
+  saveNeedsDraft();
   if (currentStep === 1) {
     renderStepTwo();
   }
@@ -502,6 +585,7 @@ function handleNext() {
     saveNeedsEntry();
     const returnToStep = Number(localStorage.getItem("cbtNeedsReturnToStep") || "6");
     localStorage.removeItem("cbtFeelingsDraft");
+    localStorage.removeItem(NEEDS_DRAFT_KEY);
     localStorage.removeItem("cbtNeedsReturnToStep");
     window.location.href = `index.html#step${returnToStep}`;
     return;
@@ -512,7 +596,12 @@ function handleNext() {
 }
 
 function handlePrev() {
-  if (currentStep <= 1) return;
+  if (currentStep <= 1) {
+    saveNeedsDraft();
+    window.location.href = "index.html#step2";
+    return;
+  }
+  saveNeedsDraft();
   currentStep -= 1;
   showStep(currentStep);
 }
@@ -526,6 +615,8 @@ if (languageSelect) {
     applyLanguage(event.target.value);
   });
 }
+
+restoreNeedsDraft();
 
 const savedFeelingsDraft = JSON.parse(localStorage.getItem(FEELINGS_DRAFT_KEY) || "[]");
 if (Array.isArray(savedFeelingsDraft) && savedFeelingsDraft.length) {
@@ -541,3 +632,7 @@ renderStepTwo();
 renderStepThree();
 renderStepFour();
 showStep(currentStep);
+
+document.getElementById("needs-form").addEventListener("input", saveNeedsDraft);
+document.getElementById("needs-form").addEventListener("change", saveNeedsDraft);
+document.getElementById("home-link").addEventListener("click", resetAppFromHome);

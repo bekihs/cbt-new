@@ -127,6 +127,110 @@ header.app-header p { margin: 2px 0 0; color: var(--text-muted); font-size: 0.78
   text-align: right;
 }
 
+.step-tracker {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0 0 24px;
+}
+.step-track-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font: inherit;
+}
+.step-track-number {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: #fff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.step-track-name {
+  overflow: hidden;
+  max-width: 100%;
+  font-size: 0.65rem;
+  line-height: 1.15;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.step-track-item:hover .step-track-number,
+.step-track-item.active .step-track-number {
+  border-color: var(--green);
+  background: var(--green);
+  color: #fff;
+}
+.step-track-item.active { color: var(--text-dark); }
+.inner-step-tracker {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin: -12px 0 24px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--green);
+  border-radius: 0 12px 12px 0;
+  background: rgba(62, 207, 142, 0.06);
+}
+.inner-step-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 0;
+  padding: 6px 4px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.68rem;
+  line-height: 1.15;
+  text-align: center;
+}
+.inner-step-number {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: #fff;
+  font-size: 0.65rem;
+  font-weight: 800;
+}
+.inner-step-item:hover,
+.inner-step-item.active {
+  background: rgba(62, 207, 142, 0.14);
+  color: var(--text-dark);
+}
+.inner-step-item.active .inner-step-number {
+  border-color: var(--green);
+  background: var(--green);
+  color: #fff;
+}
+@media (max-width: 480px) {
+  .step-tracker { gap: 2px; }
+  .step-track-name { font-size: 0.58rem; }
+  .step-track-number { width: 25px; height: 25px; }
+  .inner-step-tracker { gap: 2px; padding: 8px 4px; }
+  .inner-step-item { flex-direction: column; gap: 3px; font-size: 0.58rem; }
+}
+
 .step-title { display: block; font-size: 1.28rem; font-weight: 800; margin: 0 0 6px; letter-spacing: -0.02em; }
 .step-subtitle { margin: 0 0 22px; color: var(--text-muted); font-size: 0.88rem; line-height: 1.5; }
 
